@@ -33,11 +33,8 @@ export default function CreateRoomPage() {
       } else {
         setSessionChecked(true);
       }
-    } else if (status === "authenticated" && !session?.user) {
-      // Session is authenticated but user data is missing - try updating
-      update();
     }
-  }, [status, session, router, update]);
+  }, [status, session, router]);
 
   // Show loading state
   if (
@@ -54,10 +51,26 @@ export default function CreateRoomPage() {
     );
   }
 
-  // If we reach here with authenticated status but no user, force a page reload
+  // If we reach here with authenticated status but no user, show error
   if (status === "authenticated" && !session?.user) {
-    window.location.reload();
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Session Error
+          </h1>
+          <p className="text-gray-600 mb-6">
+            Unable to load user session. Please try signing in again.
+          </p>
+          <button
+            onClick={() => router.push("/auth/signin")}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Sign In
+          </button>
+        </div>
+      </div>
+    );
   }
 
   // Show loading while redirecting
