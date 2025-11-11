@@ -239,7 +239,7 @@ export default function Header() {
                     Dashboard
                   </Link>
                   {((session?.user as any)?.userType === "owner" ||
-                    (session?.user as unknown)?.userType === "both") && (
+                    (session?.user as any)?.userType === "both") && (
                     <Link
                       href="/rooms/create"
                       className="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
