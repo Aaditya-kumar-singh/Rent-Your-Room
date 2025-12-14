@@ -117,62 +117,13 @@ export const authOptions = {
       return true;
     },
     async session({ session, token }: { session: any; token: any }) {
-      console.log("Session callback - token:", token);
-      console.log("Session callback - session before update:", session);
-
-      if (session.user && (token as any).id) {
-        try {
-          await connectDB();
-
-          let dbUser;
-
-          // Check if token.id is a valid MongoDB ObjectId (24 characters)
-          if (
-            typeof (token as any).id === "string" &&
-            (token as any).id.length === 24
-          ) {
-            // It's a MongoDB ObjectId
-            console.log(
-              "Session callback - looking up user by MongoDB ID:",
-              (token as any).id
-            );
-            dbUser = await User.findById((token as any).id);
-          } else {
-            // It's likely a Google ID, find by googleId or email
-            console.log(
-              "Session callback - looking up user by Google ID or email"
-            );
-            dbUser = await User.findOne({
-              $or: [
-                { googleId: (token as any).id },
-                { email: session.user.email },
-              ],
-            });
-          }
-
-          if (dbUser) {
-            session.user.id = dbUser._id.toString();
-            session.user.userType = dbUser.userType;
-            session.user.phoneVerified = dbUser.phoneVerified;
-            session.user.phone = dbUser.phone;
-            console.log("Session callback - updated session with user data:", {
-              id: session.user.id,
-              userType: session.user.userType,
-              phoneVerified: session.user.phoneVerified,
-            });
-          } else {
-            console.error(
-              "Session callback - no dbUser found for token ID:",
-              (token as any).id,
-              "email:",
-              session.user.email
-            );
-          }
-        } catch (error) {
-          console.error("Session update error:", error);
-        }
-      } else {
-        console.error("Session callback - missing session.user or token.id");
+      if (session.user) {
+        session.user.id = token.id;
+        session.user.userType = token.userType;
+        session.user.phoneVerified = token.phoneVerified;
+        // Prioritize the image from the token (which comes from DB)
+        session.user.image = token.picture || token.image || session.user.image;
+        session.user.name = token.name || session.user.name;
       }
       return session;
     },
@@ -180,83 +131,67 @@ export const authOptions = {
       token,
       user,
       account,
+      trigger,
+      session
     }: {
       token: any;
       user?: any;
       account?: any;
+      trigger?: string;
+      session?: any;
     }) {
-      console.log("JWT callback - user:", user, "account:", account?.provider);
-
+      // 1. Initial Sign In
       if (user && account) {
-        if (account.provider === "google") {
-          // For Google OAuth, find the user in database and store their MongoDB ID
-          try {
-            await connectDB();
-            const dbUser = await User.findOne({ email: user.email });
-            if (dbUser) {
-              (token as any).id = dbUser._id.toString();
-              console.log(
-                "JWT callback - set token.id from Google user:",
-                (token as any).id
-              );
-            } else {
-              console.error(
-                "JWT callback - no dbUser found for Google email:",
-                user.email
-              );
-            }
-          } catch (error) {
-            console.error("JWT Google OAuth error:", error);
-          }
-        } else {
-          // For credentials, user.id is already the MongoDB ObjectId
-          (token as any).id = user.id;
-          console.log(
-            "JWT callback - set token.id from credentials user:",
-            (token as any).id
-          );
-        }
-      } else if (
-        (token as any).id &&
-        typeof (token as any).id === "string" &&
-        (token as any).id.length > 24
-      ) {
-        // Handle existing Google OAuth tokens that still have Google ID instead of MongoDB ID
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        console.log(
-          "JWT callback - migrating old Google token ID:",
-          (token as any).id
-        );
         try {
           await connectDB();
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const dbUser = await User.findOne({
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            googleId: (token as any).id,
-          });
-          if (dbUser) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (token as any).id = dbUser._id.toString();
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            console.log("JWT callback - migrated token.id:", (token as any).id);
+          let dbUser;
+
+          if (account.provider === 'google') {
+            dbUser = await User.findOne({ email: user.email });
           } else {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            console.error(
-              "JWT callback - no dbUser found for Google ID:",
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (token as any).id
-            );
+            // For credentials, user is already the DB user object (or similar)
+            // But let's be safe and re-fetch or use what we have
+            dbUser = await User.findOne({ email: user.email });
           }
-        } catch (error) {
-          console.error("JWT token migration error:", error);
+
+          if (dbUser) {
+            token.id = dbUser._id.toString();
+            token.userType = dbUser.userType;
+            token.phoneVerified = dbUser.phoneVerified;
+            token.name = dbUser.name || user.name; // Ensure name is in token
+            // Use DB profile image if it exists, otherwise fallback to Google/User image
+            token.picture = dbUser.profileImage || user.image;
+          }
+        } catch (e) {
+          console.error("JWT Initial Signin Error", e);
         }
-      } else {
-        console.log(
-          "JWT callback - token.id already set:",
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (token as any).id
-        );
       }
+      // 2. Subsequent requests (Token exists) or Session Update
+      else {
+        // If this is a session update trigger, merge new data
+        if (trigger === "update" && session) {
+          token.userType = session.userType || token.userType;
+          token.picture = session.image || token.picture;
+          token.name = session.name || token.name;
+        }
+
+        // Optional: Periodically re-sync with DB (e.g., if we want to catch external changes)
+        // For now, we'll rely on the session update mechanism or initial load.
+        // However, to fix the specific "missing photo" or "missing name" issue, let's try to fetch if missing.
+        if ((!token.picture || !token.name) && token.id) {
+          try {
+            await connectDB();
+            const dbUser = await User.findById(token.id);
+            if (dbUser) {
+              token.picture = dbUser.profileImage || token.picture;
+              token.name = dbUser.name || token.name;
+            }
+          } catch (e) {
+            console.error("JWT Re-fetch error", e);
+          }
+        }
+      }
+
       return token;
     },
     async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {

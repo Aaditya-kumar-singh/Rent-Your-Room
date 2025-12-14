@@ -80,19 +80,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if booking is in verified status (Aadhaar verified)
-    if (booking.status !== "verified") {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "INVALID_STATUS",
-            message: "Booking must be verified before payment",
-          },
-        },
-        { status: 400 }
-      );
-    }
+
 
     // Check if payment order already exists
     const existingPayment = await Payment.findOne({

@@ -3,11 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 
-interface AadhaarDocument {
-  fileUrl: string;
-  verified: boolean;
-  verificationDate?: string;
-}
+
 
 interface Payment {
   paymentId?: string;
@@ -43,8 +39,8 @@ interface Booking {
   roomId: Room;
   seekerId: Seeker;
   ownerId: string;
-  status: "pending" | "verified" | "paid" | "confirmed" | "cancelled";
-  aadhaarDocument: AadhaarDocument;
+  status: "pending" | "paid" | "confirmed" | "cancelled";
+
   payment: Payment;
   requestDate: string;
   responseDate?: string;
@@ -211,8 +207,7 @@ export default function OwnerBookingManagement() {
     switch (status) {
       case "pending":
         return "bg-yellow-100 text-yellow-800";
-      case "verified":
-        return "bg-blue-100 text-blue-800";
+
       case "paid":
         return "bg-green-100 text-green-800";
       case "confirmed":
@@ -311,16 +306,15 @@ export default function OwnerBookingManagement() {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Booking Management</h2>
         <div className="flex space-x-2">
-          {["all", "pending", "verified", "paid", "confirmed", "cancelled"].map(
+          {["all", "pending", "paid", "confirmed", "cancelled"].map(
             (status) => (
               <button
                 key={status}
                 onClick={() => handleStatusFilter(status)}
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  selectedStatus === status
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
+                className={`px-3 py-1 rounded-full text-sm font-medium ${selectedStatus === status
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
               >
                 {status.charAt(0).toUpperCase() + status.slice(1)}
               </button>
@@ -416,43 +410,7 @@ export default function OwnerBookingManagement() {
                 </div>
               </div>
 
-              <div className="mb-6">
-                <h4 className="font-medium text-gray-900 mb-3">
-                  Aadhaar Verification
-                </h4>
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-                  <div>
-                    <p className="text-sm">
-                      <span className="font-medium">Status:</span>{" "}
-                      <span
-                        className={`px-2 py-1 rounded text-xs ${
-                          booking.aadhaarDocument.verified
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {booking.aadhaarDocument.verified
-                          ? "Verified"
-                          : "Pending"}
-                      </span>
-                    </p>
-                    {booking.aadhaarDocument.verificationDate && (
-                      <p className="text-xs text-gray-600 mt-1">
-                        Verified on:{" "}
-                        {formatDate(booking.aadhaarDocument.verificationDate)}
-                      </p>
-                    )}
-                  </div>
-                  <a
-                    href={booking.aadhaarDocument.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-                  >
-                    View Document
-                  </a>
-                </div>
-              </div>
+
 
               {booking.message && (
                 <div className="mb-6">
@@ -466,42 +424,40 @@ export default function OwnerBookingManagement() {
               )}
 
               {(booking.status === "pending" ||
-                booking.status === "verified" ||
                 booking.status === "paid") && (
-                <div className="flex space-x-3 pt-4 border-t border-gray-200">
-                  <button
-                    onClick={() =>
-                      updateBookingStatus(booking._id, "confirmed")
-                    }
-                    disabled={
-                      processingBooking === booking._id ||
-                      booking.payment.status !== "completed" ||
-                      !booking.aadhaarDocument.verified
-                    }
-                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                  >
-                    {processingBooking === booking._id
-                      ? "Processing..."
-                      : "Accept Booking"}
-                  </button>
-                  <button
-                    onClick={() => {
-                      const reason = prompt(
-                        "Please provide a reason for cancellation:"
-                      );
-                      if (reason !== null) {
-                        updateBookingStatus(booking._id, "cancelled", reason);
+                  <div className="flex space-x-3 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() =>
+                        updateBookingStatus(booking._id, "confirmed")
                       }
-                    }}
-                    disabled={processingBooking === booking._id}
-                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                  >
-                    {processingBooking === booking._id
-                      ? "Processing..."
-                      : "Reject Booking"}
-                  </button>
-                </div>
-              )}
+                      disabled={
+                        processingBooking === booking._id ||
+                        booking.payment.status !== "completed"
+                      }
+                      className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
+                      {processingBooking === booking._id
+                        ? "Processing..."
+                        : "Accept Booking"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        const reason = prompt(
+                          "Please provide a reason for cancellation:"
+                        );
+                        if (reason !== null) {
+                          updateBookingStatus(booking._id, "cancelled", reason);
+                        }
+                      }}
+                      disabled={processingBooking === booking._id}
+                      className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
+                      {processingBooking === booking._id
+                        ? "Processing..."
+                        : "Reject Booking"}
+                    </button>
+                  </div>
+                )}
 
               {booking.status === "confirmed" && (
                 <div className="pt-4 border-t border-gray-200">
@@ -531,41 +487,43 @@ export default function OwnerBookingManagement() {
             </div>
           ))}
         </div>
-      )}
+      )
+      }
 
-      {totalPages > 1 && (
-        <div className="flex justify-center space-x-2 mt-8">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
-          >
-            Previous
-          </button>
-
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+      {
+        totalPages > 1 && (
+          <div className="flex justify-center space-x-2 mt-8">
             <button
-              key={page}
-              onClick={() => handlePageChange(page)}
-              className={`px-3 py-2 rounded-md ${
-                currentPage === page
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`px-3 py-2 rounded-md ${currentPage === page
                   ? "bg-blue-600 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              {page}
-            </button>
-          ))}
+                  }`}
+              >
+                {page}
+              </button>
+            ))}
 
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
-          >
-            Next
-          </button>
-        </div>
-      )}
-    </div>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+        )
+      }
+    </div >
   );
 }

@@ -1,13 +1,13 @@
 export default function HowItWorks() {
   const steps = [
     {
-      step: "1",
+      step: "01",
       title: "Search & Filter",
       description:
-        "Use our advanced search to find rooms that match your preferences and budget.",
+        "Use our advanced search to find rooms that match your exact preferences and budget.",
       icon: (
         <svg
-          className="w-8 h-8"
+          className="w-6 h-6"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -22,13 +22,13 @@ export default function HowItWorks() {
       ),
     },
     {
-      step: "2",
+      step: "02",
       title: "View Details",
       description:
-        "Explore room photos, amenities, and location details with Google Maps integration.",
+        "Explore room photos, amenities, and location details with integrated maps.",
       icon: (
         <svg
-          className="w-8 h-8"
+          className="w-6 h-6"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -49,13 +49,13 @@ export default function HowItWorks() {
       ),
     },
     {
-      step: "3",
+      step: "03",
       title: "Verify & Book",
       description:
-        "Upload your Aadhaar for verification and make secure payment to confirm booking.",
+        "Request a booking directly with the owner and make a secure payment to confirm.",
       icon: (
         <svg
-          className="w-8 h-8"
+          className="w-6 h-6"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -70,13 +70,13 @@ export default function HowItWorks() {
       ),
     },
     {
-      step: "4",
+      step: "04",
       title: "Move In",
       description:
         "Connect with the property owner and move into your new room hassle-free.",
       icon: (
         <svg
-          className="w-8 h-8"
+          className="w-6 h-6"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -93,47 +93,39 @@ export default function HowItWorks() {
   ];
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-24 bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             How It Works
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto text-lg">
-            Finding and booking your perfect room is simple with our streamlined
-            process
+          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+            Finding and booking your perfect room is simple with our streamlined process.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
           {steps.map((step, index) => (
-            <div key={index} className="text-center">
-              <div className="relative mb-6">
-                <div className="bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+            <div key={index} className="relative group">
+              <div className="bg-card border border-border rounded-2xl p-8 hover:shadow-xl hover:border-primary/30 transition-all duration-300 h-full flex flex-col items-start text-left">
+                <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
                   {step.icon}
                 </div>
-                <div className="absolute -top-2 -right-2 bg-blue-100 text-blue-600 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
+
+                <div className="mb-4 text-4xl font-black text-muted/20 select-none absolute top-4 right-6">
                   {step.step}
                 </div>
+
+                <h3 className="text-xl font-bold text-foreground mb-3">
+                  {step.title}
+                </h3>
+
+                <p className="text-muted-foreground leading-relaxed">
+                  {step.description}
+                </p>
               </div>
-
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                {step.title}
-              </h3>
-
-              <p className="text-gray-600 leading-relaxed">
-                {step.description}
-              </p>
             </div>
           ))}
-        </div>
-
-        {/* Connection Lines for Desktop */}
-        <div className="hidden lg:block relative mt-8">
-          <div className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-blue-200 transform -translate-y-20"></div>
-          <div className="absolute top-0 left-1/4 w-0.5 h-4 bg-blue-200 transform -translate-y-24"></div>
-          <div className="absolute top-0 right-1/4 w-0.5 h-4 bg-blue-200 transform -translate-y-24"></div>
-          <div className="absolute top-0 left-1/2 w-0.5 h-4 bg-blue-200 transform -translate-y-24 -translate-x-0.5"></div>
         </div>
       </div>
     </section>

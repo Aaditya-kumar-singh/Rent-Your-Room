@@ -13,7 +13,7 @@ interface RouteParams {
 
 /**
  * GET /api/documents/[documentId] - Secure document access with authorization
- * Requirements: 3.1, 3.2 - Secure Aadhaar document access
+ * Requirements: 3.1, 3.2 - Secure document access
  */
 async function getDocument(
   req: AuthenticatedRequest,

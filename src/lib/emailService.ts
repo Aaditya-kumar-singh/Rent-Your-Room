@@ -363,6 +363,57 @@ class EmailService {
 
     return this.sendEmail(ownerEmail, { subject, html, text });
   }
+
+  async sendOTP(email: string, otp: string): Promise<boolean> {
+    const subject = "Your Verification Code";
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background-color: #4F46E5; color: white; padding: 20px; text-align: center; }
+            .content { padding: 20px; background-color: #f9f9f9; text-align: center; }
+            .otp-code { font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #4F46E5; margin: 20px 0; padding: 10px; background: white; border-radius: 5px; display: inline-block; }
+            .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Verification Code</h1>
+            </div>
+            <div class="content">
+              <p>Hello,</p>
+              <p>Your verification code is:</p>
+              
+              <div class="otp-code">${otp}</div>
+              
+              <p>This code will expire in 10 minutes. Do not share this code with anyone.</p>
+            </div>
+            <div class="footer">
+              <p>This is an automated message from Room Rental Platform</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const text = `
+      Your Verification Code
+      
+      Hello,
+      
+      Your verification code is: ${otp}
+      
+      This code will expire in 10 minutes. Do not share this code with anyone.
+    `;
+
+    return this.sendEmail(email, { subject, html, text });
+  }
 }
 
 export const emailService = new EmailService();

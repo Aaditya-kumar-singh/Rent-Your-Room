@@ -4,12 +4,8 @@ export interface IBooking extends Document {
   roomId: Types.ObjectId;
   seekerId: Types.ObjectId;
   ownerId: Types.ObjectId;
-  status: "pending" | "verified" | "paid" | "confirmed" | "cancelled";
-  aadhaarDocument: {
-    fileUrl: string;
-    verified: boolean;
-    verificationDate?: Date;
-  };
+  status: "pending" | "paid" | "confirmed" | "cancelled";
+
   payment: {
     paymentId?: string;
     orderId?: string;
@@ -25,22 +21,7 @@ export interface IBooking extends Document {
   updatedAt: Date;
 }
 
-const AadhaarDocumentSchema = new Schema(
-  {
-    fileUrl: {
-      type: String,
-      required: true,
-    },
-    verified: {
-      type: Boolean,
-      default: false,
-    },
-    verificationDate: {
-      type: Date,
-    },
-  },
-  { _id: false }
-);
+
 
 const PaymentSchema = new Schema(
   {
@@ -89,12 +70,8 @@ const BookingSchema = new Schema<IBooking>(
     },
     status: {
       type: String,
-      enum: ["pending", "verified", "paid", "confirmed", "cancelled"],
+      enum: ["pending", "paid", "confirmed", "cancelled"],
       default: "pending",
-    },
-    aadhaarDocument: {
-      type: AadhaarDocumentSchema,
-      required: true,
     },
     payment: {
       type: PaymentSchema,

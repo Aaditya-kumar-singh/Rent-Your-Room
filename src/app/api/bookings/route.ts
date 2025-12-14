@@ -12,10 +12,6 @@ import Joi from "joi";
 const bookingCreateSchema = Joi.object({
   roomId: Joi.string().required(),
   message: Joi.string().max(500).optional(),
-  aadhaarDocument: Joi.object({
-    fileUrl: Joi.string().required(),
-    verified: Joi.boolean().default(false),
-  }).required(),
   payment: Joi.object({
     amount: Joi.number().positive().required(),
   }).required(),
@@ -60,7 +56,6 @@ async function createBooking(req: AuthenticatedRequest): Promise<NextResponse> {
     const validatedData = validateInput<{
       roomId: string;
       message?: string;
-      aadhaarDocument: { fileUrl: string; verified: boolean };
       payment: { amount: number };
     }>(bookingCreateSchema, body);
 
@@ -148,24 +143,7 @@ async function createBooking(req: AuthenticatedRequest): Promise<NextResponse> {
       );
     }
 
-    // Validate Aadhaar document URL belongs to the user
-    if (
-      !validatedData.aadhaarDocument.fileUrl.includes(
-        `/uploads/documents/${req.user.id}/`
-      )
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "UNAUTHORIZED_DOCUMENT_ACCESS",
-            message: "Unauthorized document access",
-            details: "You can only use your own uploaded documents",
-          },
-        },
-        { status: 403 }
-      );
-    }
+
 
     // Validate payment amount matches room rent
     if (validatedData.payment.amount !== room.monthlyRent) {
@@ -188,10 +166,6 @@ async function createBooking(req: AuthenticatedRequest): Promise<NextResponse> {
       seekerId: new Types.ObjectId(req.user.id),
       ownerId: room.ownerId._id,
       status: "pending",
-      aadhaarDocument: {
-        fileUrl: validatedData.aadhaarDocument.fileUrl,
-        verified: validatedData.aadhaarDocument.verified || false,
-      },
       payment: {
         amount: validatedData.payment.amount,
         status: "pending",

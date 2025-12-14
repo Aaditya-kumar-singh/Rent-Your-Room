@@ -7,7 +7,7 @@ import Joi from "joi";
 // Enhanced validation schema for document upload
 const documentUploadSchema = Joi.object({
   documentType: Joi.string()
-    .valid("aadhaar", "pan", "passport", "license")
+    .valid("pan", "passport", "license")
     .required(),
   fileName: Joi.string().required(),
   bookingId: Joi.string().optional(),
@@ -16,7 +16,7 @@ const documentUploadSchema = Joi.object({
 
 /**
  * POST /api/upload/documents - Upload documents with encryption and secure storage
- * Requirements: 3.1, 3.2 - Aadhaar verification with secure document storage
+ * Requirements: 3.1, 3.2 - Secure document storage
  */
 async function uploadDocumentHandler(
   req: AuthenticatedRequest
@@ -73,7 +73,7 @@ async function uploadDocumentHandler(
 
     // Validate form data
     const validatedData = validateInput<{
-      documentType: "aadhaar" | "pan" | "passport" | "license";
+      documentType: "pan" | "passport" | "license";
       fileName: string;
       bookingId?: string;
       encrypt: boolean;
@@ -108,12 +108,10 @@ async function uploadDocumentHandler(
     const uploadResult = await uploadDocument(buffer, file.name, {
       userId: req.user.id,
       documentType: validatedData.documentType as
-        | "aadhaar"
         | "pan"
         | "passport"
         | "license",
-      encrypt:
-        validatedData.encrypt && validatedData.documentType === "aadhaar",
+      encrypt: false,
     });
 
     // Log document upload for audit trail

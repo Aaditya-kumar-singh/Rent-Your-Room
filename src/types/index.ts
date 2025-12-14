@@ -43,11 +43,7 @@ export interface Booking {
   seekerId: string;
   ownerId: string;
   status: "pending" | "verified" | "paid" | "confirmed" | "cancelled";
-  aadhaarDocument: {
-    fileUrl: string;
-    verified: boolean;
-    verificationDate?: Date;
-  };
+
   payment: {
     paymentId?: string;
     orderId?: string;

@@ -10,142 +10,14 @@ export default function CreateRoomPage() {
   const { data: session, status, update } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sessionChecked, setSessionChecked] = useState(false);
+  const [refreshed, setRefreshed] = useState(false);
 
-  // Handle redirects in useEffect to avoid render-time navigation
+  // Force session refresh on mount to get latest data
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/signin");
-      return;
+    if (status === "authenticated" && !refreshed) {
+      update().then(() => setRefreshed(true));
     }
-
-    if (status === "authenticated" && session?.user) {
-      const user = session.user as typeof session.user & {
-        userType?: "owner" | "seeker" | "both" | "admin";
-      };
-
-      // Redirect to user type selection if userType is not set
-      if (
-        !user?.userType ||
-        !["owner", "seeker", "both", "admin"].includes(user.userType)
-      ) {
-        router.push("/auth/user-type");
-      } else {
-        setSessionChecked(true);
-      }
-    }
-  }, [status, session, router]);
-
-  // Show loading state
-  if (
-    status === "loading" ||
-    (status === "authenticated" && !session?.user && !sessionChecked)
-  ) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // If we reach here with authenticated status but no user, show error
-  if (status === "authenticated" && !session?.user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Session Error
-          </h1>
-          <p className="text-gray-600 mb-6">
-            Unable to load user session. Please try signing in again.
-          </p>
-          <button
-            onClick={() => router.push("/auth/signin")}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            Sign In
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Show loading while redirecting
-  if (status === "unauthenticated") {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Redirecting to sign in...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Check if user can create rooms
-  if (!session || !session.user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Access Denied
-          </h1>
-          <p className="text-gray-600 mb-6">
-            Please sign in to create room listings.
-          </p>
-          <button
-            onClick={() => router.push("/auth/signin")}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            Sign In
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const user = session.user as typeof session.user & {
-    userType?: "owner" | "seeker" | "both" | "admin";
-  };
-
-  // Show loading while redirecting to user type selection
-  if (
-    !user?.userType ||
-    !["owner", "seeker", "both", "admin"].includes(user.userType)
-  ) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Setting up your account...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (user.userType !== "owner" && user.userType !== "both") {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Access Denied
-          </h1>
-          <p className="text-gray-600 mb-6">
-            Only property owners can create room listings.
-          </p>
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            Go to Dashboard
-          </button>
-        </div>
-      </div>
-    );
-  }
+  }, [status, refreshed, update]);
 
   const handleSubmit = async (formData: unknown) => {
     setIsSubmitting(true);
@@ -168,7 +40,6 @@ export default function CreateRoomPage() {
         );
       }
 
-      // Success - redirect to dashboard
       router.push(
         "/dashboard?tab=owner&success=Room listing created successfully"
       );
@@ -185,10 +56,104 @@ export default function CreateRoomPage() {
     router.push("/dashboard");
   };
 
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/auth/signin");
+    }
+  }, [status, router]);
+
+  // Show loading
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect if not authenticated
+  if (status === "unauthenticated") {
+    return null;
+  }
+
+  // Wait for session refresh
+  if (status === "authenticated" && !refreshed) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Refreshing session...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if we have session data
+  if (!session?.user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading user data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const user = session.user as typeof session.user & {
+    userType?: string;
+  };
+
+  // Debug logging
+  console.log("Client session data:", {
+    status,
+    hasSession: !!session,
+    hasUser: !!session?.user,
+    userType: user.userType,
+    fullUser: user,
+  });
+
+  // Check user permissions
+  if (
+    !user.userType ||
+    (user.userType !== "owner" &&
+      user.userType !== "both" &&
+      user.userType !== "admin")
+  ) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center bg-white p-8 rounded-lg shadow-lg max-w-md">
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            Permission Required
+          </h2>
+          <p className="text-gray-600 mb-4">
+            You need to be an owner to create room listings.
+          </p>
+          <div className="space-y-2">
+            <button
+              onClick={() => router.push("/auth/user-type")}
+              className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Set User Type
+            </button>
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+            >
+              Go to Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="mb-8">
           <nav className="flex" aria-label="Breadcrumb">
             <ol className="flex items-center space-x-4">
@@ -203,7 +168,7 @@ export default function CreateRoomPage() {
               <li>
                 <div className="flex items-center">
                   <svg
-                    className="flex-shrink-0 h-5 w-5 text-gray-300"
+                    className="shrink-0 h-5 w-5 text-gray-300"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -222,11 +187,10 @@ export default function CreateRoomPage() {
           </nav>
         </div>
 
-        {/* Error Message */}
         {error && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
             <div className="flex">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <svg
                   className="h-5 w-5 text-red-400"
                   fill="currentColor"
@@ -251,14 +215,12 @@ export default function CreateRoomPage() {
           </div>
         )}
 
-        {/* Form */}
         <RoomListingFormWrapper
           isEditing={false}
           onSubmit={handleSubmit}
           onCancel={handleCancel}
         />
 
-        {/* Loading Overlay */}
         {isSubmitting && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 text-center">

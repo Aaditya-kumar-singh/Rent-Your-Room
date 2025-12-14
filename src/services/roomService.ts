@@ -258,7 +258,8 @@ export class RoomService {
       .select("-__v")
       .sort(sortOptions)
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .lean() as unknown as IRoom[];
 
     const total = await Room.countDocuments(query);
     const totalPages = Math.ceil(total / limit);

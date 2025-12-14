@@ -3,7 +3,7 @@ import connectDB from "@/lib/mongodb";
 import { Types, FilterQuery } from "mongoose";
 
 export interface BookingFilters {
-  status?: "pending" | "verified" | "paid" | "confirmed" | "cancelled";
+  status?: "pending" | "paid" | "confirmed" | "cancelled";
   roomId?: string | Types.ObjectId;
   seekerId?: string | Types.ObjectId;
   ownerId?: string | Types.ObjectId;
@@ -302,7 +302,7 @@ export class BookingService {
    */
   static async updateStatus(
     id: string | Types.ObjectId,
-    status: "pending" | "verified" | "paid" | "confirmed" | "cancelled",
+    status: "pending" | "paid" | "confirmed" | "cancelled",
     responseMessage?: string
   ): Promise<IBooking | null> {
     await connectDB();
@@ -329,32 +329,7 @@ export class BookingService {
     return updatedBooking;
   }
 
-  /**
-   * Verify Aadhaar document
-   */
-  static async verifyAadhaar(
-    id: string | Types.ObjectId,
-    verified: boolean = true
-  ): Promise<IBooking | null> {
-    await connectDB();
 
-    if (!Types.ObjectId.isValid(id)) {
-      throw new Error("Invalid booking ID format");
-    }
-
-    const updatedBooking = await Booking.findByIdAndUpdate(
-      id,
-      {
-        "aadhaarDocument.verified": verified,
-        "aadhaarDocument.verificationDate": new Date(),
-        status: verified ? "verified" : "pending",
-        updatedAt: new Date(),
-      },
-      { new: true, runValidators: true }
-    ).select("-__v");
-
-    return updatedBooking;
-  }
 
   /**
    * Update payment information

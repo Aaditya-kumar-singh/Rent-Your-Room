@@ -13,7 +13,7 @@ cloudinary.config({
 
 export interface DocumentUploadOptions {
   userId: string;
-  documentType: "aadhaar" | "pan" | "passport" | "license";
+  documentType: "pan" | "passport" | "license";
   encrypt?: boolean;
 }
 
@@ -93,13 +93,7 @@ export async function uploadDocument(
     let encrypted = false;
     let iv = "";
 
-    // Encrypt sensitive documents
-    if (options.encrypt && options.documentType === "aadhaar") {
-      const encryptionResult = encryptDocument(buffer);
-      finalBuffer = encryptionResult.encryptedBuffer;
-      iv = encryptionResult.iv;
-      encrypted = true;
-    }
+
 
     const timestamp = Date.now();
     const fileExtension = path.extname(filename);

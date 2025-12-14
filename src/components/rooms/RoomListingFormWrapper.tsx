@@ -23,10 +23,20 @@ export default function RoomListingFormWrapper({
   useEffect(() => {
     if (!containerRef.current) return;
 
+    // Prevent double mounting
+    if (vueAppRef.current) {
+      return;
+    }
+
     // Import the full Vue component
     import("../vue/RoomListingForm")
       .then((module) => {
         const RoomListingFormComponent = module.default;
+
+        // Check again if already mounted (race condition)
+        if (vueAppRef.current) {
+          return;
+        }
 
         // Create Vue app instance with the full component
         const app = createApp(RoomListingFormComponent, {
@@ -62,7 +72,7 @@ export default function RoomListingFormWrapper({
         vueAppRef.current = null;
       }
     };
-  }, [initialData, isEditing, onSubmit, onCancel]);
+  }, [initialData, isEditing, onCancel, onSubmit]);
 
   return <div ref={containerRef} />;
 }

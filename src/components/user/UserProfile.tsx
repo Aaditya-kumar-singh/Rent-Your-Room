@@ -163,202 +163,189 @@ export default function UserProfile() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   if (showPhoneVerification) {
     return (
-      <PhoneVerification
-        onVerificationComplete={handlePhoneVerificationComplete}
-        onCancel={() => setShowPhoneVerification(false)}
-      />
+      <div className="max-w-md mx-auto">
+        <PhoneVerification
+          onVerificationComplete={handlePhoneVerificationComplete}
+          onCancel={() => setShowPhoneVerification(false)}
+        />
+      </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6">User Profile</h2>
+    <div className="space-y-8">
+      {/* Header Section */}
+      <div className="space-y-1">
+        <h3 className="text-lg font-medium leading-6 text-foreground">Profile Settings</h3>
+        <p className="text-sm text-muted-foreground">
+          Manage your public profile and account preferences.
+        </p>
+      </div>
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-red-800 text-sm">{error}</p>
-        </div>
-      )}
-
-      {success && (
-        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
-          <p className="text-green-800 text-sm">{success}</p>
-        </div>
-      )}
-
-      {profile && (
-        <div className="space-y-6">
-          {/* Profile Image */}
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                {profile.profileImage ? (
-                  <Image
-                    src={profile.profileImage}
-                    alt="Profile"
-                    width={64}
-                    height={64}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-gray-500 text-xl">
-                    {profile.name.charAt(0).toUpperCase()}
-                  </span>
-                )}
-              </div>
-              <label
-                htmlFor="profile-image-upload"
-                className="absolute -bottom-1 -right-1 bg-blue-600 text-white rounded-full p-1 cursor-pointer hover:bg-blue-700 transition-colors"
-              >
-                {uploadingImage ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                ) : (
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                )}
-              </label>
-              <input
-                id="profile-image-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-                disabled={uploadingImage}
-              />
-            </div>
-            <div>
-              <h3 className="text-lg font-medium">{profile.name}</h3>
-              <p className="text-gray-600">{profile.email}</p>
-              <p className="text-xs text-gray-500 mt-1">
-                Click the camera icon to update your profile picture
-              </p>
-            </div>
+      <div className="grid gap-6">
+        {/* Status Messages */}
+        {error && (
+          <div className="p-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/10 dark:text-red-400 dark:border-red-900/50">
+            {error}
           </div>
+        )}
+        {success && (
+          <div className="p-4 text-sm text-green-600 bg-green-50 border border-green-200 rounded-lg dark:bg-green-900/10 dark:text-green-400 dark:border-green-900/50">
+            {success}
+          </div>
+        )}
 
-          {/* Phone Verification Status */}
-          <div className="bg-gray-50 p-4 rounded-md">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium">Phone Number</h4>
-                <p className="text-sm text-gray-600">
-                  {profile.phone ? (
-                    <>
-                      {profile.phone}
-                      {profile.phoneVerified ? (
-                        <span className="ml-2 text-green-600">✓ Verified</span>
-                      ) : (
-                        <span className="ml-2 text-red-600">
-                          ✗ Not Verified
-                        </span>
+        {profile && (
+          <>
+            {/* Avatar Section */}
+            <div className="flex items-start space-x-6 pb-6 border-b border-border">
+              <div className="relative group">
+                <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-border bg-muted">
+                  {profile.profileImage ? (
+                    <Image
+                      src={profile.profileImage}
+                      alt="Profile"
+                      width={96}
+                      height={96}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary text-2xl font-bold">
+                      {profile.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+
+                <label
+                  htmlFor="profile-image-upload"
+                  className="absolute bottom-0 right-0 p-1.5 bg-primary text-primary-foreground rounded-full shadow-lg cursor-pointer hover:bg-primary/90 transition-colors"
+                >
+                  {uploadingImage ? (
+                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  )}
+                </label>
+                <input
+                  id="profile-image-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  disabled={uploadingImage}
+                />
+              </div>
+
+              <div className="flex-1 space-y-1 pt-2">
+                <h4 className="text-base font-medium text-foreground">{profile.name}</h4>
+                <p className="text-sm text-muted-foreground">{profile.email}</p>
+                <p className="text-xs text-muted-foreground">Recommended size: 500x500px. Max 5MB.</p>
+              </div>
+            </div>
+
+            {/* Main Form */}
+            <form onSubmit={handleUpdateProfile} className="space-y-6">
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-2">
+                  <label htmlFor="name" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="userType" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Account Type
+                  </label>
+                  <select
+                    id="userType"
+                    value={userType}
+                    onChange={(e) => setUserType(e.target.value as any)}
+                    className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="seeker">Room Seeker</option>
+                    <option value="owner">Property Owner</option>
+                    <option value="both">Both (Seeker & Owner)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Phone Verification */}
+              <div className="p-4 rounded-lg bg-muted/50 border border-border">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-foreground">Phone Number</label>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      {profile.phone ? profile.phone : "No phone number added"}
+                      {profile.phone && (
+                        profile.phoneVerified ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                            Verified
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                            Unverified
+                          </span>
+                        )
                       )}
+                    </div>
+                  </div>
+                  {!profile.phoneVerified && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPhoneVerification(true)}
+                      className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors border border-input rounded-md hover:bg-background hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      {profile.phone ? "Verify Now" : "Add Phone"}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4">
+                <button
+                  type="submit"
+                  disabled={updating}
+                  className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white transition-colors bg-primary rounded-md hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none"
+                >
+                  {updating ? (
+                    <>
+                      <span className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Updating...
                     </>
                   ) : (
-                    "Not provided"
+                    "Save Changes"
                   )}
-                </p>
-              </div>
-              {!profile.phoneVerified && (
-                <button
-                  onClick={() => setShowPhoneVerification(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
-                >
-                  {profile.phone ? "Verify" : "Add Phone"}
                 </button>
-              )}
-            </div>
-          </div>
+              </div>
+            </form>
 
-          {/* Profile Form */}
-          <form onSubmit={handleUpdateProfile} className="space-y-4">
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Full Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
+            {/* Footer Metadata */}
+            <div className="pt-6 mt-6 border-t border-border text-xs text-muted-foreground flex justify-between">
+              <span>Member since {new Date(profile.createdAt).toLocaleDateString()}</span>
+              <span>Last updated {new Date(profile.updatedAt).toLocaleDateString()}</span>
             </div>
-
-            <div>
-              <label
-                htmlFor="userType"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Account Type
-              </label>
-              <select
-                id="userType"
-                value={userType}
-                onChange={(e) =>
-                  setUserType(e.target.value as "owner" | "seeker" | "both")
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="seeker">Room Seeker</option>
-                <option value="owner">Property Owner</option>
-                <option value="both">Both (Seeker & Owner)</option>
-              </select>
-              <p className="text-xs text-gray-500 mt-1">
-                Choose your primary role on the platform
-              </p>
-            </div>
-
-            <button
-              type="submit"
-              disabled={updating}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-            >
-              {updating ? "Updating..." : "Update Profile"}
-            </button>
-          </form>
-
-          {/* Account Info */}
-          <div className="border-t pt-4">
-            <h4 className="font-medium mb-2">Account Information</h4>
-            <div className="text-sm text-gray-600 space-y-1">
-              <p>
-                Member since: {new Date(profile.createdAt).toLocaleDateString()}
-              </p>
-              <p>
-                Last updated: {new Date(profile.updatedAt).toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,11 +1,25 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
-// Initialize Razorpay instance
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-});
+// Initialize Razorpay instance lazily
+let razorpayInstance: Razorpay | null = null;
+
+function getRazorpayInstance(): Razorpay {
+  if (razorpayInstance) {
+    return razorpayInstance;
+  }
+
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    throw new Error("Razorpay credentials are missing in environment variables");
+  }
+
+  razorpayInstance = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  });
+
+  return razorpayInstance;
+}
 
 export interface PaymentOrderData {
   amount: number; // Amount in paise (smallest currency unit)
@@ -25,7 +39,8 @@ export interface PaymentVerificationData {
  */
 export async function createPaymentOrder(orderData: PaymentOrderData) {
   try {
-    const order = await razorpay.orders.create({
+    const instance = getRazorpayInstance();
+    const order = await instance.orders.create({
       amount: orderData.amount,
       currency: orderData.currency,
       receipt: orderData.receipt,
@@ -55,12 +70,18 @@ export function verifyPaymentSignature(
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
       verificationData;
 
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    if (!keySecret) {
+      console.error("RAZORPAY_KEY_SECRET is missing");
+      return false;
+    }
+
     // Create signature string
     const signatureString = `${razorpay_order_id}|${razorpay_payment_id}`;
 
     // Generate expected signature
     const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+      .createHmac("sha256", keySecret)
       .update(signatureString)
       .digest("hex");
 
@@ -76,7 +97,8 @@ export function verifyPaymentSignature(
  */
 export async function getPaymentDetails(paymentId: string) {
   try {
-    const payment = await razorpay.payments.fetch(paymentId);
+    const instance = getRazorpayInstance();
+    const payment = await instance.payments.fetch(paymentId);
     return {
       success: true,
       payment,
@@ -100,7 +122,8 @@ export async function createRefund(paymentId: string, amount?: number) {
       refundData.amount = amount;
     }
 
-    const refund = await razorpay.payments.refund(paymentId, refundData);
+    const instance = getRazorpayInstance();
+    const refund = await instance.payments.refund(paymentId, refundData);
     return {
       success: true,
       refund,

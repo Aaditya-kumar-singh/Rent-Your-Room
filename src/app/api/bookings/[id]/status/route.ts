@@ -102,9 +102,8 @@ async function updateBookingStatus(
           error: {
             code: "INVALID_BOOKING_STATE",
             message: "Cannot update booking status",
-            details: `Booking status '${
-              booking.status
-            }' cannot be changed. Valid states: ${validStatuses.join(", ")}`,
+            details: `Booking status '${booking.status
+              }' cannot be changed. Valid states: ${validStatuses.join(", ")}`,
           },
         },
         { status: 400 }
@@ -128,21 +127,7 @@ async function updateBookingStatus(
         );
       }
 
-      // Only allow confirmation if Aadhaar is verified
-      if (!booking.aadhaarDocument.verified) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: {
-              code: "AADHAAR_NOT_VERIFIED",
-              message: "Cannot confirm booking without Aadhaar verification",
-              details:
-                "Aadhaar document must be verified before confirming booking",
-            },
-          },
-          { status: 400 }
-        );
-      }
+
     }
 
     // Update booking status

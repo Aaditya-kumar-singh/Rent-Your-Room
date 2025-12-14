@@ -213,14 +213,14 @@ const sampleNames = [
 ];
 
 const profileImages = [
-  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150",
+  "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=150&h=150",
+  "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&h=150",
+  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&h=150",
+  "https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=150&h=150",
+  "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&h=150",
+  "https://images.unsplash.com/photo-1633332755192-727a05c4013d?auto=format&fit=crop&w=150&h=150",
+  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150",
 ];
 
 const roomImages = [
@@ -348,8 +348,7 @@ async function generateRoomsInBatches(
     const rooms = [];
 
     console.log(
-      `Processing batch ${
-        batch + 1
+      `Processing batch ${batch + 1
       }/${totalBatches} (${roomsInThisBatch} rooms)...`
     );
 
@@ -369,20 +368,20 @@ async function generateRoomsInBatches(
         roomType === "pg"
           ? 8000
           : roomType === "hostel"
-          ? 6000
-          : roomType === "single"
-          ? 12000
-          : roomType === "double"
-          ? 18000
-          : roomType === "shared"
-          ? 8000
-          : roomType === "studio"
-          ? 15000
-          : roomType === "1bhk"
-          ? 20000
-          : roomType === "2bhk"
-          ? 35000
-          : 50000;
+            ? 6000
+            : roomType === "single"
+              ? 12000
+              : roomType === "double"
+                ? 18000
+                : roomType === "shared"
+                  ? 8000
+                  : roomType === "studio"
+                    ? 15000
+                    : roomType === "1bhk"
+                      ? 20000
+                      : roomType === "2bhk"
+                        ? 35000
+                        : 50000;
 
       const rent = baseRent + Math.floor(Math.random() * baseRent * 0.5);
 
@@ -414,27 +413,22 @@ async function generateRoomsInBatches(
         "Street",
       ];
 
-      const areaName = `${getRandomElement(areas)} ${
-        Math.floor(Math.random() * 50) + 1
-      }`;
-      const address = `${Math.floor(Math.random() * 999) + 1}, ${areaName}, ${
-        city.name
-      }`;
+      const areaName = `${getRandomElement(areas)} ${Math.floor(Math.random() * 50) + 1
+        }`;
+      const address = `${Math.floor(Math.random() * 999) + 1}, ${areaName}, ${city.name
+        }`;
 
       rooms.push({
         ownerId: owner._id,
-        title: `${
-          roomType.charAt(0).toUpperCase() + roomType.slice(1)
-        } Room in ${areaName}`,
-        description: `Beautiful ${roomType} room available for rent in ${
-          city.name
-        }. Well-maintained property with modern amenities. Perfect for ${
-          roomType === "pg"
+        title: `${roomType.charAt(0).toUpperCase() + roomType.slice(1)
+          } Room in ${areaName}`,
+        description: `Beautiful ${roomType} room available for rent in ${city.name
+          }. Well-maintained property with modern amenities. Perfect for ${roomType === "pg"
             ? "students and working professionals"
             : roomType === "shared"
-            ? "sharing with roommates"
-            : "comfortable living"
-        }. Located in a prime area with easy access to public transport, markets, and restaurants. The property offers excellent connectivity and is situated in a safe neighborhood.`,
+              ? "sharing with roommates"
+              : "comfortable living"
+          }. Located in a prime area with easy access to public transport, markets, and restaurants. The property offers excellent connectivity and is situated in a safe neighborhood.`,
         monthlyRent: rent,
         location: {
           address,
@@ -458,8 +452,7 @@ async function generateRoomsInBatches(
     const createdRooms = await Room.insertMany(rooms);
     totalCreated += createdRooms.length;
     console.log(
-      `Batch ${batch + 1} completed: ${
-        createdRooms.length
+      `Batch ${batch + 1} completed: ${createdRooms.length
       } rooms created (Total: ${totalCreated})`
     );
   }

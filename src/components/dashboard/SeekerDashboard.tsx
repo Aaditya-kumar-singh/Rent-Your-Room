@@ -37,9 +37,7 @@ interface Booking {
   };
   status: string;
   requestDate: string;
-  aadhaarDocument?: {
-    verified: boolean;
-  };
+
   payment?: {
     status: string;
     amount: number;
@@ -461,11 +459,7 @@ export default function SeekerDashboard() {
                         {booking.status.charAt(0).toUpperCase() +
                           booking.status.slice(1)}
                       </span>
-                      {booking.aadhaarDocument?.verified && (
-                        <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
-                          Aadhaar Verified
-                        </span>
-                      )}
+
                       {booking.payment?.status === "completed" && (
                         <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
                           Payment Complete

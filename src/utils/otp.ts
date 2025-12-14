@@ -45,49 +45,14 @@ export function formatPhoneNumber(phone: string): string {
   return cleanPhone;
 }
 
+import { emailService } from "@/lib/emailService";
+
 /**
- * Send SMS using a mock service (replace with actual SMS service)
- * In production, integrate with services like Twilio, AWS SNS, or Indian SMS providers
+ * Send OTP via Email
  */
-export async function sendSMS(
-  phone: string,
-  message: string
+export async function sendVerificationEmail(
+  email: string,
+  otp: string
 ): Promise<boolean> {
-  try {
-    // Mock SMS service - replace with actual implementation
-    console.log(`SMS to ${phone}: ${message}`);
-
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // In production, implement actual SMS service:
-    /*
-    const response = await fetch('https://api.sms-service.com/send', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.SMS_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        to: phone,
-        message: message,
-        from: 'RoomRental'
-      })
-    });
-    
-    return response.ok;
-    */
-
-    return true; // Mock success
-  } catch (error) {
-    console.error("SMS sending error:", error);
-    return false;
-  }
-}
-
-/**
- * Generate OTP message
- */
-export function generateOTPMessage(otp: string): string {
-  return `Your Room Rental Platform verification code is: ${otp}. This code will expire in 10 minutes. Do not share this code with anyone.`;
+  return emailService.sendOTP(email, otp);
 }

@@ -6,8 +6,7 @@ import {
   validatePhoneNumber,
   formatPhoneNumber,
   generateOTP,
-  sendSMS,
-  generateOTPMessage,
+  sendVerificationEmail,
 } from "@/utils/otp";
 import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
@@ -15,6 +14,16 @@ import { authOptions } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
+    // Check local session
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user?.email) {
+      return NextResponse.json(
+        { error: "You must be logged in to verify your phone number" },
+        { status: 401 }
+      );
+    }
+
     const { phone } = await request.json();
 
     if (!phone) {
@@ -43,14 +52,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingUser) {
-      // Get current session to check if it's the same user
-      const session = await getServerSession(authOptions);
-
-      if (
-        !session ||
-        !(session as any).user?.email ||
-        existingUser.email !== (session as any).user.email
-      ) {
+      if (existingUser.email !== session.user.email) {
         return NextResponse.json(
           { error: "Phone number is already registered with another account" },
           { status: 409 }
@@ -87,20 +89,19 @@ export async function POST(request: NextRequest) {
       attempts: 0,
     });
 
-    // Send SMS
-    const message = generateOTPMessage(otp);
-    const smsSent = await sendSMS(formattedPhone, message);
+    // Send OTP via Email instead of SMS
+    const emailSent = await sendVerificationEmail(session.user.email, otp);
 
-    if (!smsSent) {
+    if (!emailSent) {
       return NextResponse.json(
-        { error: "Failed to send OTP. Please try again." },
+        { error: "Failed to send OTP to your registered email." },
         { status: 500 }
       );
     }
 
     return NextResponse.json(
       {
-        message: "OTP sent successfully",
+        message: "OTP sent to your registered email address",
         phone: formattedPhone,
         expiresIn: 600, // 10 minutes in seconds
       },

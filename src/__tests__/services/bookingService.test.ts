@@ -1,9 +1,6 @@
 import { BookingService } from "@/services/bookingService";
 import { NotificationService } from "@/services/notificationService";
-import {
-  validateAadhaarNumber,
-  validateAadhaarDocument,
-} from "@/utils/aadhaarValidation";
+
 import { Types } from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
@@ -59,7 +56,7 @@ describe("Booking System", () => {
       monthlyRent: 15000,
       location: {
         address: "123 Test Street",
-      coordinates: { type: "Point", coordinates: [77.209, 28.6139] },
+        coordinates: { type: "Point", coordinates: [77.209, 28.6139] },
         city: "Delhi",
         state: "Delhi",
         pincode: "110001",
@@ -74,10 +71,7 @@ describe("Booking System", () => {
 
   describe("Booking Creation and Management", () => {
     const sampleBookingData = {
-      aadhaarDocument: {
-        fileUrl: "/uploads/documents/test-aadhaar.jpg",
-        verified: false,
-      },
+
       payment: {
         amount: 15000,
         status: "pending" as const,
@@ -100,7 +94,7 @@ describe("Booking System", () => {
       expect(booking.seekerId).toEqual(testSeekerId);
       expect(booking.ownerId).toEqual(testOwnerId);
       expect(booking.status).toBe("pending");
-      expect(booking.aadhaarDocument.verified).toBe(false);
+
       expect(booking.payment.status).toBe("pending");
     });
 
@@ -176,99 +170,7 @@ describe("Booking System", () => {
     });
   });
 
-  describe("Aadhaar Verification", () => {
-    it("should validate correct Aadhaar numbers", () => {
-      // Using test Aadhaar numbers (these are not real)
-      const validAadhaarNumbers = [
-        "234567890123", // Valid format with proper checksum
-        "345678901234", // Another valid format
-      ];
 
-      validAadhaarNumbers.forEach((number) => {
-        const isValid = validateAadhaarNumber(number);
-        // Note: These might fail checksum validation, but format should be correct
-        expect(typeof isValid).toBe("boolean");
-      });
-    });
-
-    it("should reject invalid Aadhaar numbers", () => {
-      const invalidAadhaarNumbers = [
-        "123456789012", // Starts with 1
-        "023456789012", // Starts with 0
-        "12345678901", // Too short
-        "1234567890123", // Too long
-        "abcd56789012", // Contains letters
-      ];
-
-      invalidAadhaarNumbers.forEach((number) => {
-        expect(validateAadhaarNumber(number)).toBe(false);
-      });
-    });
-
-    it("should validate Aadhaar document", () => {
-      const validDocument = validateAadhaarDocument(
-        "/uploads/documents/test-aadhaar.jpg",
-        "image/jpeg",
-        1024 * 1024 // 1MB
-      );
-
-      expect(validDocument.isValid).toBe(true);
-      expect(validDocument.errors).toHaveLength(0);
-    });
-
-    it("should reject invalid document types", () => {
-      const invalidDocument = validateAadhaarDocument(
-        "/uploads/documents/test-aadhaar.txt",
-        "text/plain",
-        1024 * 1024
-      );
-
-      expect(invalidDocument.isValid).toBe(false);
-      expect(invalidDocument.errors).toContain(
-        "Invalid file type. Please upload JPEG, PNG, WebP, or PDF files only."
-      );
-    });
-
-    it("should reject oversized documents", () => {
-      const oversizedDocument = validateAadhaarDocument(
-        "/uploads/documents/test-aadhaar.jpg",
-        "image/jpeg",
-        10 * 1024 * 1024 // 10MB
-      );
-
-      expect(oversizedDocument.isValid).toBe(false);
-      expect(oversizedDocument.errors).toContain(
-        "File size too large. Maximum allowed size is 5MB."
-      );
-    });
-
-    it("should verify Aadhaar in booking", async () => {
-      const bookingData = {
-        roomId: testRoomId,
-        seekerId: testSeekerId,
-        ownerId: testOwnerId,
-        aadhaarDocument: {
-          fileUrl: "/uploads/documents/test-aadhaar.jpg",
-          verified: false,
-        },
-        payment: {
-          amount: 15000,
-          status: "pending" as const,
-        },
-      };
-
-      const createdBooking = await BookingService.createBooking(bookingData);
-      const verifiedBooking = await BookingService.verifyAadhaar(
-        (createdBooking._id as Types.ObjectId).toString(),
-        true
-      );
-
-      expect(verifiedBooking).toBeDefined();
-      expect(verifiedBooking?.aadhaarDocument.verified).toBe(true);
-      expect(verifiedBooking?.aadhaarDocument.verificationDate).toBeDefined();
-      expect(verifiedBooking?.status).toBe("verified");
-    });
-  });
 
   describe("Payment Processing", () => {
     it("should update payment information", async () => {
@@ -276,10 +178,7 @@ describe("Booking System", () => {
         roomId: testRoomId,
         seekerId: testSeekerId,
         ownerId: testOwnerId,
-        aadhaarDocument: {
-          fileUrl: "/uploads/documents/test-aadhaar.jpg",
-          verified: true,
-        },
+
         payment: {
           amount: 15000,
           status: "pending" as const,
@@ -310,10 +209,7 @@ describe("Booking System", () => {
         roomId: testRoomId,
         seekerId: testSeekerId,
         ownerId: testOwnerId,
-        aadhaarDocument: {
-          fileUrl: "/uploads/documents/test-aadhaar.jpg",
-          verified: true,
-        },
+
         payment: {
           amount: 15000,
           status: "pending" as const,
@@ -356,7 +252,7 @@ describe("Booking System", () => {
         monthlyRent: 20000,
         location: {
           address: "456 Test Avenue",
-      coordinates: { type: "Point", coordinates: [77.1025, 28.7041] },
+          coordinates: { type: "Point", coordinates: [77.1025, 28.7041] },
           city: "Delhi",
           state: "Delhi",
           pincode: "110007",
@@ -375,7 +271,7 @@ describe("Booking System", () => {
           seekerId: testSeekerId,
           ownerId: testOwnerId,
           status: "pending" as const,
-          aadhaarDocument: { fileUrl: "/test1.jpg", verified: false },
+
           payment: { amount: 15000, status: "pending" as const },
         },
         {
@@ -383,7 +279,7 @@ describe("Booking System", () => {
           seekerId: testSeekerId,
           ownerId: testOwnerId,
           status: "confirmed" as const,
-          aadhaarDocument: { fileUrl: "/test2.jpg", verified: true },
+
           payment: { amount: 20000, status: "completed" as const },
         },
       ];

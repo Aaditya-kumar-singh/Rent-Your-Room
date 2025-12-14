@@ -18,26 +18,7 @@ interface Room {
   };
 }
 
-interface AadhaarVerificationData {
-  fileUrl: string;
-  verified: boolean;
-  verificationData: {
-    documentId: string;
-    userId: string;
-    verificationStatus: "pending" | "verified" | "rejected";
-    verificationDate: string;
-    verificationMethod: string;
-    confidence: number;
-    issues: string[];
-    extractedData: {
-      aadhaarNumber?: string;
-      name?: string;
-      dateOfBirth?: string;
-      gender?: string;
-      address?: string;
-    };
-  };
-}
+
 
 interface BookingResponse {
   success: boolean;
@@ -77,43 +58,28 @@ export default defineComponent({
   },
   setup(props) {
     const message = ref("");
-    const aadhaarData = ref<AadhaarVerificationData | null>(null);
     const isSubmitting = ref(false);
     const submitError = ref("");
     const currentStep = ref(1);
-    const totalSteps = 3;
+    const totalSteps = 2;
 
     const canProceedToStep2 = computed(() => {
       return message.value.trim().length > 0;
     });
 
-    const canProceedToStep3 = computed(() => {
-      return aadhaarData.value && aadhaarData.value.verified;
-    });
-
     const canSubmit = computed(() => {
-      return canProceedToStep3.value && !isSubmitting.value;
+      return canProceedToStep2.value && !isSubmitting.value;
     });
 
     const stepTitles = [
       "Booking Details",
-      "Aadhaar Verification",
       "Review & Submit",
     ];
-
-    const handleAadhaarVerification = (data: AadhaarVerificationData) => {
-      aadhaarData.value = data;
-      if (data.verified) {
-        currentStep.value = 3;
-      }
-    };
 
     const nextStep = () => {
       if (currentStep.value < totalSteps) {
         if (currentStep.value === 1 && canProceedToStep2.value) {
           currentStep.value = 2;
-        } else if (currentStep.value === 2 && canProceedToStep3.value) {
-          currentStep.value = 3;
         }
       }
     };
@@ -125,7 +91,7 @@ export default defineComponent({
     };
 
     const submitBooking = async () => {
-      if (!canSubmit.value || !aadhaarData.value) return;
+      if (!canSubmit.value) return;
 
       isSubmitting.value = true;
       submitError.value = "";
@@ -134,10 +100,6 @@ export default defineComponent({
         const bookingData = {
           roomId: props.room._id,
           message: message.value.trim(),
-          aadhaarDocument: {
-            fileUrl: aadhaarData.value.fileUrl,
-            verified: aadhaarData.value.verified,
-          },
           payment: {
             amount: props.room.monthlyRent,
           },
@@ -181,16 +143,13 @@ export default defineComponent({
 
     return {
       message,
-      aadhaarData,
       isSubmitting,
       submitError,
       currentStep,
       totalSteps,
       stepTitles,
       canProceedToStep2,
-      canProceedToStep3,
       canSubmit,
-      handleAadhaarVerification,
       nextStep,
       prevStep,
       submitBooking,
@@ -305,39 +264,15 @@ export default defineComponent({
               <div>
                 <h4 class="text-sm font-medium text-blue-800 mb-1">What happens next?</h4>
                 <p class="text-sm text-blue-700">
-                  After submitting your booking request, the property owner will review your application 
-                  and Aadhaar verification. They can then accept or decline your request.
+                  After submitting your booking request, the property owner will review your application. They can then accept or decline your request.
                 </p>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Step 2: Aadhaar Verification -->
+        <!-- Step 2: Review & Submit -->
         <div v-if="currentStep === 2" class="space-y-6">
-          <div class="bg-yellow-50 p-4 rounded-lg mb-6">
-            <div class="flex items-start">
-              <svg class="w-5 h-5 text-yellow-400 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-              <div>
-                <h4 class="text-sm font-medium text-yellow-800 mb-1">Identity Verification Required</h4>
-                <p class="text-sm text-yellow-700">
-                  Please upload your Aadhaar card for identity verification. This helps property owners 
-                  verify tenant identity and is required for all bookings.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Aadhaar Upload Component will be inserted here by the wrapper -->
-          <div id="aadhaar-upload-placeholder">
-            <!-- This will be replaced by the AadhaarUpload component -->
-          </div>
-        </div>
-
-        <!-- Step 3: Review & Submit -->
-        <div v-if="currentStep === 3" class="space-y-6">
           <div class="bg-green-50 p-4 rounded-lg">
             <div class="flex items-start">
               <svg class="w-5 h-5 text-green-400 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -376,43 +311,6 @@ export default defineComponent({
                   {{ message || 'No message provided' }}
                 </p>
               </div>
-
-              <div v-if="aadhaarData">
-                <h5 class="font-medium text-gray-900 mb-2">Identity Verification</h5>
-                <div class="flex items-center space-x-3">
-                  <div
-                    :class="[
-                      'flex items-center px-3 py-1 rounded-full text-sm font-medium',
-                      aadhaarData.verified
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    ]"
-                  >
-                    <svg
-                      v-if="aadhaarData.verified"
-                      class="w-4 h-4 mr-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <svg
-                      v-else
-                      class="w-4 h-4 mr-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    {{ aadhaarData.verified ? 'Verified' : 'Pending Verification' }}
-                  </div>
-                  <span class="text-sm text-gray-600">
-                    Confidence: {{ Math.round(aadhaarData.verificationData.confidence * 100) }}%
-                  </span>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -423,7 +321,6 @@ export default defineComponent({
               <li>• Your booking request will be sent to the property owner for review</li>
               <li>• The owner may accept or decline your request based on their criteria</li>
               <li>• If accepted, you will be notified and can proceed with payment</li>
-              <li>• Your Aadhaar information will be shared with the property owner for verification</li>
               <li>• All personal information will be kept confidential and secure</li>
             </ul>
           </div>
@@ -464,10 +361,10 @@ export default defineComponent({
           <button
             v-if="currentStep < totalSteps"
             @click="nextStep"
-            :disabled="(currentStep === 1 && !canProceedToStep2) || (currentStep === 2 && !canProceedToStep3)"
+            :disabled="(currentStep === 1 && !canProceedToStep2)"
             :class="[
               'px-6 py-2 text-sm font-medium rounded-lg transition-colors',
-              (currentStep === 1 && canProceedToStep2) || (currentStep === 2 && canProceedToStep3)
+              (currentStep === 1 && canProceedToStep2)
                 ? 'bg-blue-600 text-white hover:bg-blue-700'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             ]"

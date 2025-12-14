@@ -33,9 +33,7 @@ interface Booking {
   };
   status: string;
   requestDate: string;
-  aadhaarDocument?: {
-    verified: boolean;
-  };
+
   payment?: {
     status: string;
     amount: number;
@@ -441,11 +439,10 @@ export default function OwnerDashboard() {
                     ₹{room.monthlyRent.toLocaleString()}/month
                   </span>
                   <span
-                    className={`px-2 py-1 text-xs rounded-full ${
-                      room.availability
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
+                    className={`px-2 py-1 text-xs rounded-full ${room.availability
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                      }`}
                   >
                     {room.availability ? "Available" : "Occupied"}
                   </span>
@@ -511,22 +508,17 @@ export default function OwnerDashboard() {
                   </p>
                   <div className="flex items-center mt-2">
                     <span
-                      className={`px-2 py-1 text-xs rounded-full ${
-                        booking.status === "pending"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : booking.status === "confirmed"
+                      className={`px-2 py-1 text-xs rounded-full ${booking.status === "pending"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : booking.status === "confirmed"
                           ? "bg-green-100 text-green-800"
                           : "bg-red-100 text-red-800"
-                      }`}
+                        }`}
                     >
                       {booking.status.charAt(0).toUpperCase() +
                         booking.status.slice(1)}
                     </span>
-                    {booking.aadhaarDocument?.verified && (
-                      <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
-                        Aadhaar Verified
-                      </span>
-                    )}
+
                   </div>
                 </div>
                 {booking.status === "pending" && (

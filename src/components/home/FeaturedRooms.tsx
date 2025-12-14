@@ -40,27 +40,26 @@ export default function FeaturedRooms() {
 
   if (loading) {
     return (
-      <section className="py-16 bg-gray-50">
+      <section className="py-24 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Featured Rooms
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Discover our handpicked selection of premium rooms
-            </p>
+          <div className="text-center mb-16 space-y-4">
+            <div className="h-8 w-64 bg-muted animate-pulse mx-auto rounded-md" />
+            <div className="h-4 w-96 bg-muted animate-pulse mx-auto rounded-md" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(6)].map((_, index) => (
               <div
                 key={index}
-                className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse"
+                className="bg-card border border-border rounded-xl overflow-hidden shadow-sm"
               >
-                <div className="h-48 bg-gray-300"></div>
-                <div className="p-6">
-                  <div className="h-4 bg-gray-300 rounded mb-2"></div>
-                  <div className="h-4 bg-gray-300 rounded w-2/3 mb-4"></div>
-                  <div className="h-6 bg-gray-300 rounded w-1/3"></div>
+                <div className="h-56 bg-muted animate-pulse"></div>
+                <div className="p-6 space-y-4">
+                  <div className="h-6 bg-muted rounded w-3/4 animate-pulse"></div>
+                  <div className="h-4 bg-muted rounded w-1/2 animate-pulse"></div>
+                  <div className="flex justify-between pt-4">
+                    <div className="h-8 w-24 bg-muted rounded animate-pulse" />
+                    <div className="h-8 w-24 bg-muted rounded animate-pulse" />
+                  </div>
                 </div>
               </div>
             ))}
@@ -71,15 +70,15 @@ export default function FeaturedRooms() {
   }
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Featured Rooms
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
             Discover our handpicked selection of premium rooms in prime
-            locations
+            locations, tailored for your comfort.
           </p>
         </div>
 
@@ -88,20 +87,21 @@ export default function FeaturedRooms() {
             {rooms.map((room) => (
               <div
                 key={room._id}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                className="group bg-card border border-border rounded-xl overflow-hidden hover:shadow-xl hover:border-primary/20 transition-all duration-300 flex flex-col"
               >
-                <div className="relative h-48">
+                {/* Image Container */}
+                <div className="relative h-64 overflow-hidden">
                   {room.images && room.images.length > 0 ? (
                     <Image
                       src={room.images[0]}
                       alt={room.title}
                       fill
-                      className="object-cover"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                    <div className="w-full h-full bg-muted flex items-center justify-center">
                       <svg
-                        className="w-12 h-12 text-gray-400"
+                        className="w-12 h-12 text-muted-foreground"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -115,44 +115,48 @@ export default function FeaturedRooms() {
                       </svg>
                     </div>
                   )}
+                  <div className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-foreground shadow-sm">
+                    For Rent
+                  </div>
                 </div>
 
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                    {room.title}
-                  </h3>
-                  <p className="text-gray-600 mb-3 text-sm">
-                    {room.location.address}, {room.location.city}
-                  </p>
+                {/* Content */}
+                <div className="p-6 flex flex-col flex-grow">
+                  <div className="flex-grow">
+                    <h3 className="text-xl font-bold text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-colors">
+                      {room.title}
+                    </h3>
+                    <div className="flex items-center text-muted-foreground mb-4 text-sm">
+                      <svg className="w-4 h-4 mr-1 stroke-current" fill="none" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <span className="line-clamp-1">{room.location.city}, {room.location.address}</span>
+                    </div>
 
-                  {room.amenities && room.amenities.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {room.amenities.slice(0, 3).map((amenity, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
-                        >
+                    {/* Amenities Pills */}
+                    <div className="flex flex-wrap gap-2 mb-6">
+                      {room.amenities?.slice(0, 3).map((amenity, idx) => (
+                        <span key={idx} className="px-2.5 py-1 bg-muted text-muted-foreground text-xs font-medium rounded-md">
                           {amenity}
                         </span>
                       ))}
-                      {room.amenities.length > 3 && (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                          +{room.amenities.length - 3} more
+                      {(room.amenities?.length || 0) > 3 && (
+                        <span className="px-2.5 py-1 bg-muted text-muted-foreground text-xs font-medium rounded-md">
+                          +{room.amenities.length - 3}
                         </span>
                       )}
                     </div>
-                  )}
+                  </div>
 
-                  <div className="flex items-center justify-between">
-                    <div className="text-2xl font-bold text-gray-900">
-                      ₹{room.monthlyRent.toLocaleString()}
-                      <span className="text-sm font-normal text-gray-500">
-                        /month
-                      </span>
+                  <div className="pt-4 border-t border-border flex items-center justify-between mt-auto">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Monthly Rent</p>
+                      <p className="text-2xl font-bold text-primary">₹{room.monthlyRent.toLocaleString()}</p>
                     </div>
                     <Link
                       href={`/rooms/${room._id}`}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                      className="group/btn relative overflow-hidden rounded-lg bg-primary px-5 py-2.5 text-primary-foreground font-medium shadow-md transition-all hover:shadow-lg hover:bg-primary/90"
                     >
                       View Details
                     </Link>
@@ -162,31 +166,21 @@ export default function FeaturedRooms() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
-            <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-              <svg
-                className="w-12 h-12 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m0 0H7m2 0v-5a2 2 0 012-2h2a2 2 0 012 2v5m-4 0h4"
-                />
+          <div className="text-center py-20 bg-muted/30 rounded-3xl border border-dashed border-border">
+            <div className="w-20 h-20 mx-auto mb-6 bg-muted rounded-full flex items-center justify-center">
+              <svg className="w-10 h-10 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m0 0H7m2 0v-5a2 2 0 012-2h2a2 2 0 012 2v5m-4 0h4" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-xl font-semibold text-foreground mb-2">
               No Featured Rooms Yet
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-muted-foreground mb-8">
               Check back soon for our curated selection of premium rooms.
             </p>
             <Link
               href="/search"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md font-medium transition-colors"
+              className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
             >
               Browse All Rooms
             </Link>
@@ -194,12 +188,15 @@ export default function FeaturedRooms() {
         )}
 
         {rooms.length > 0 && (
-          <div className="text-center mt-12">
+          <div className="text-center mt-16">
             <Link
               href="/search"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-md font-medium transition-colors"
+              className="inline-flex items-center justify-center rounded-full border border-border bg-background px-8 py-3 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted hover:text-primary"
             >
               View All Rooms
+              <svg className="ml-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
             </Link>
           </div>
         )}

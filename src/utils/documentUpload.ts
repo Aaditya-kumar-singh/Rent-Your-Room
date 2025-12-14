@@ -30,7 +30,7 @@ export interface DocumentValidationResult {
 }
 
 export interface DocumentUploadOptions {
-  documentType: "aadhaar" | "pan" | "passport" | "license";
+  documentType: "pan" | "passport" | "license";
   bookingId?: string;
   encrypt?: boolean;
 }
@@ -63,17 +63,7 @@ export function validateDocumentFile(file: File): DocumentValidationResult {
     };
   }
 
-  // Additional validation for Aadhaar documents
-  if (file.name.toLowerCase().includes("aadhaar")) {
-    if (file.size < 50 * 1024) {
-      // Minimum 50KB
-      return {
-        isValid: false,
-        error:
-          "Document file seems too small. Please ensure it's a clear, readable document.",
-      };
-    }
-  }
+
 
   return { isValid: true };
 }
@@ -242,7 +232,7 @@ export function createDocumentPreview(file: File): Promise<string> {
  */
 export function getDocumentTypeDisplayName(documentType: string): string {
   const displayNames: Record<string, string> = {
-    aadhaar: "Aadhaar Card",
+
     pan: "PAN Card",
     passport: "Passport",
     license: "Driving License",
@@ -255,6 +245,6 @@ export function getDocumentTypeDisplayName(documentType: string): string {
  * Check if document type requires encryption
  */
 export function requiresEncryption(documentType: string): boolean {
-  const encryptionRequired = ["aadhaar", "passport"];
+  const encryptionRequired = ["passport"];
   return encryptionRequired.includes(documentType);
 }
