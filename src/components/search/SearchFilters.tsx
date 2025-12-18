@@ -52,16 +52,20 @@ export default function SearchFilters({
     onFiltersChangeRef.current = onFiltersChange;
   }, [onFiltersChange]);
 
+
   const handleFilterChange = useCallback((
     key: keyof SearchFilters,
     value: string | number | string[] | undefined
   ) => {
     setFilters((prev) => {
-      const newFilters = { ...prev, [key]: value };
-      onFiltersChangeRef.current(newFilters);
-      return newFilters;
+      return { ...prev, [key]: value };
     });
   }, []);
+
+  // Notify parent of filter changes after state updates
+  useEffect(() => {
+    onFiltersChangeRef.current(filters);
+  }, [filters]);
 
   // Debounce search text
   useEffect(() => {
@@ -104,14 +108,10 @@ export default function SearchFilters({
       if (value === "") {
         setFilters(prev => {
           if (prev.city) {
-            const newFilters = { ...prev, city: undefined, searchText: "" };
-            onFiltersChangeRef.current(newFilters);
-            return newFilters;
+            return { ...prev, city: undefined, searchText: "" };
           }
           // If just clearing text
-          const newFilters = { ...prev, searchText: "" };
-          onFiltersChangeRef.current(newFilters);
-          return newFilters;
+          return { ...prev, searchText: "" };
         });
       }
     } else {
@@ -119,9 +119,7 @@ export default function SearchFilters({
       setShowSuggestions(false);
       // Clear filters immediately if input cleared
       setFilters(prev => {
-        const newFilters = { ...prev, searchText: "", city: undefined };
-        onFiltersChangeRef.current(newFilters);
-        return newFilters;
+        return { ...prev, searchText: "", city: undefined };
       });
     }
   }, []); // filters dependency intentionally omitted to avoid recreation, logic inside setFilters handles it? 
@@ -132,9 +130,7 @@ export default function SearchFilters({
     setShowSuggestions(false);
 
     setFilters((prev) => {
-      const newFilters = { ...prev, city: city, searchText: undefined };
-      onFiltersChangeRef.current(newFilters);
-      return newFilters;
+      return { ...prev, city: city, searchText: undefined };
     });
   }, []);
 
@@ -145,16 +141,13 @@ export default function SearchFilters({
         ? currentAmenities.filter((a) => a !== amenity)
         : [...currentAmenities, amenity];
 
-      const newFilters = { ...prev, amenities: newAmenities };
-      onFiltersChangeRef.current(newFilters);
-      return newFilters;
+      return { ...prev, amenities: newAmenities };
     });
   }, []);
 
   const clearFilters = useCallback(() => {
     setFilters({});
     setLocationInput("");
-    onFiltersChangeRef.current({});
   }, []);
 
   const commonAmenities = [

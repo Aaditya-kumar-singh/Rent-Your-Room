@@ -7,13 +7,7 @@ import {
   watch,
 } from "vue";
 
-// Declare global google maps types
-declare global {
-  interface Window {
-    google: typeof google;
-    __NEXT_PUBLIC_GOOGLE_MAPS_API_KEY__?: string;
-  }
-}
+
 
 // Define interfaces for props
 interface RoomFormData {
@@ -90,9 +84,8 @@ export default defineComponent({
     });
 
     const isSubmitting = ref(false);
-    const mapLoaded = ref(false);
     const imagePreview = ref<Array<{ url: string; file?: File }>>([]);
-    const mapContainer = ref<HTMLElement>();
+    const submitError = ref("");
 
     // Available amenities
     const availableAmenities = [
@@ -112,9 +105,7 @@ export default defineComponent({
       "Garden",
     ];
 
-    // Google Maps variables
-    let map: google.maps.Map | null = null;
-    let marker: google.maps.Marker | null = null;
+
 
     // Initialize form with existing data if editing
     onMounted(() => {
@@ -127,178 +118,17 @@ export default defineComponent({
         }));
       }
 
-      // Initialize Google Maps
-      initializeMap();
+
     });
 
-    // Initialize Google Maps
-    const initializeMap = async () => {
-      try {
-        // Check if Google Maps API key is available from environment
-        const apiKey =
-          window.__NEXT_PUBLIC_GOOGLE_MAPS_API_KEY__ ||
-          process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-        if (!apiKey) {
-          console.warn("Google Maps API key not found");
-          showMapFallback();
-          return;
-        }
-
-        // Wait for Google Maps to load
-        if (typeof google === "undefined") {
-          // Load Google Maps script if not already loaded
-          await loadGoogleMapsScript();
-        }
-
-        await nextTick();
-
-        if (!mapContainer.value) return;
-
-        // Default to Mumbai coordinates
-        const defaultCenter = { lat: 19.076, lng: 72.8777 };
-        const center =
-          formData.location.coordinates.lat && formData.location.coordinates.lng
-            ? formData.location.coordinates
-            : defaultCenter;
-
-        map = new google.maps.Map(mapContainer.value, {
-          zoom: 13,
-          center: center,
-          mapTypeControl: false,
-          streetViewControl: false,
-          fullscreenControl: false,
-        });
-
-        // Add marker if coordinates exist
-        if (
-          formData.location.coordinates.lat &&
-          formData.location.coordinates.lng
-        ) {
-          addMarker(formData.location.coordinates);
-        }
-
-        // Add click listener to map
-        map.addListener("click", (event: google.maps.MapMouseEvent) => {
-          if (event.latLng) {
-            const lat = event.latLng.lat();
-            const lng = event.latLng.lng();
-
-            formData.location.coordinates.lat = lat;
-            formData.location.coordinates.lng = lng;
-
-            addMarker({ lat, lng });
-            clearError("coordinates");
-          }
-        });
-
-        mapLoaded.value = true;
-      } catch (error) {
-        console.error("Error initializing map:", error);
-        showMapFallback();
-      }
-    };
-
-    // Show fallback when map fails to load
-    const showMapFallback = () => {
-      if (mapContainer.value) {
-        mapContainer.value.innerHTML = `
-          <div class="flex items-center justify-center h-full bg-gray-100 rounded-md">
-            <div class="text-center">
-              <p class="text-gray-600 mb-2">Map failed to load</p>
-              <p class="text-sm text-gray-500">Please enter coordinates manually below</p>
-            </div>
-          </div>
-        `;
-      }
-    };
-
-    // Load Google Maps script
-    const loadGoogleMapsScript = (): Promise<void> => {
-      return new Promise((resolve, reject) => {
-        if (typeof google !== "undefined") {
-          resolve();
-          return;
-        }
-
-        // Check if API key is available
-        const apiKey =
-          window.__NEXT_PUBLIC_GOOGLE_MAPS_API_KEY__ ||
-          process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-        if (!apiKey) {
-          reject(new Error("Google Maps API key not configured"));
-          return;
-        }
-
-        // Check if script is already loading
-        const existingScript = document.querySelector(
-          'script[src*="maps.googleapis.com"]'
-        );
-        if (existingScript) {
-          // Wait for existing script to load
-          existingScript.addEventListener("load", () => resolve());
-          existingScript.addEventListener("error", () =>
-            reject(new Error("Failed to load Google Maps"))
-          );
-          return;
-        }
-
-        const script = document.createElement("script");
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-        script.async = true;
-        script.defer = true;
-
-        script.onload = () => {
-          // Add a small delay to ensure Google Maps is fully initialized
-          setTimeout(() => resolve(), 100);
-        };
-
-        script.onerror = () => reject(new Error("Failed to load Google Maps"));
-
-        document.head.appendChild(script);
-      });
-    };
-
-    // Add marker to map
-    const addMarker = (position: { lat: number; lng: number }) => {
-      if (!map) return;
-
-      // Remove existing marker
-      if (marker) {
-        marker.setMap(null);
-      }
-
-      // Add new marker
-      marker = new google.maps.Marker({
-        position: position,
-        map: map,
-        draggable: true,
-      });
-
-      // Update coordinates when marker is dragged
-      marker.addListener("dragend", () => {
-        if (marker) {
-          const position = marker.getPosition();
-          if (position) {
-            formData.location.coordinates.lat = position.lat();
-            formData.location.coordinates.lng = position.lng();
-          }
-        }
-      });
-
-      // Center map on marker
-      map.setCenter(position);
-    };
 
     // Handle manual coordinate changes
     const onCoordinateChange = () => {
       const lat = formData.location.coordinates.lat;
       const lng = formData.location.coordinates.lng;
 
-      if (lat && lng && map) {
-        const position = { lat, lng };
-        addMarker(position);
+      if (lat && lng) {
         clearError("coordinates");
       }
     };
@@ -370,8 +200,8 @@ export default defineComponent({
       if (!formData.title.trim()) {
         setError("title", "Title is required");
         isValid = false;
-      } else if (formData.title.length < 5) {
-        setError("title", "Title must be at least 5 characters");
+      } else if (formData.title.length < 10) {
+        setError("title", "Title must be at least 10 characters");
         isValid = false;
       }
 
@@ -379,8 +209,8 @@ export default defineComponent({
       if (!formData.description.trim()) {
         setError("description", "Description is required");
         isValid = false;
-      } else if (formData.description.length < 20) {
-        setError("description", "Description must be at least 20 characters");
+      } else if (formData.description.length < 50) {
+        setError("description", "Description must be at least 50 characters");
         isValid = false;
       }
 
@@ -512,10 +342,8 @@ export default defineComponent({
         props.onSubmit(submitData);
       } catch (error) {
         console.error("Form submission error:", error);
-        setError(
-          "images",
-          error instanceof Error ? error.message : "Failed to upload images"
-        );
+        submitError.value =
+          error instanceof Error ? error.message : "Failed to create listing";
       } finally {
         isSubmitting.value = false;
       }
@@ -540,15 +368,14 @@ export default defineComponent({
       formData,
       errors,
       isSubmitting,
-      mapLoaded,
       imagePreview,
-      mapContainer,
       availableAmenities,
       handleSubmit,
       handleCancel,
       handleImageUpload,
       removeImage,
       onCoordinateChange,
+      submitError,
     };
   },
   template: `
@@ -573,7 +400,7 @@ export default defineComponent({
               type="text"
               required
               maxlength="100"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
               :class="{ 'border-red-500': errors.title }"
               placeholder="e.g., Spacious Single Room in Central Location"
             />
@@ -596,7 +423,7 @@ export default defineComponent({
               required
               min="0"
               step="100"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
               :class="{ 'border-red-500': errors.monthlyRent }"
               placeholder="10000"
             />
@@ -618,7 +445,7 @@ export default defineComponent({
             id="roomType"
             v-model="formData.roomType"
             required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
             :class="{ 'border-red-500': errors.roomType }"
           >
             <option value="">Select Room Type</option>
@@ -651,7 +478,7 @@ export default defineComponent({
             required
             rows="4"
             maxlength="1000"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
             :class="{ 'border-red-500': errors.description }"
             placeholder="Describe your room, including features, nearby amenities, and any special conditions..."
           ></textarea>
@@ -682,7 +509,7 @@ export default defineComponent({
                 v-model="formData.location.address"
                 required
                 rows="2"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
                 :class="{ 'border-red-500': errors.address }"
                 placeholder="Enter complete address with landmarks"
               ></textarea>
@@ -704,7 +531,7 @@ export default defineComponent({
                   v-model="formData.location.city"
                   type="text"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
                   :class="{ 'border-red-500': errors.city }"
                   placeholder="Mumbai"
                 />
@@ -725,7 +552,7 @@ export default defineComponent({
                   v-model="formData.location.state"
                   type="text"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
                   :class="{ 'border-red-500': errors.state }"
                   placeholder="Maharashtra"
                 />
@@ -748,7 +575,7 @@ export default defineComponent({
                   required
                   pattern="[1-9][0-9]{5}"
                   maxlength="6"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
                   :class="{ 'border-red-500': errors.pincode }"
                   placeholder="400001"
                 />
@@ -758,28 +585,13 @@ export default defineComponent({
               </div>
             </div>
 
-            <!-- Map Location Picker -->
+            <!-- Coordinates Input -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Location on Map *
+                Coordinates (Latitude & Longitude) *
               </label>
-              <div class="relative">
-                <div
-                  id="map-container"
-                  ref="mapContainer"
-                  class="w-full h-64 border border-gray-300 rounded-md"
-                  :class="{ 'border-red-500': errors.coordinates }"
-                ></div>
-                <div
-                  v-if="!mapLoaded"
-                  class="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-md"
-                >
-                  <p class="text-gray-500">Loading map...</p>
-                </div>
-              </div>
-
-              <!-- Manual coordinate input as fallback -->
-              <div class="mt-3 grid grid-cols-2 gap-4">
+              
+              <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label
                     for="latitude"
@@ -792,7 +604,7 @@ export default defineComponent({
                     v-model.number="formData.location.coordinates.lat"
                     type="number"
                     step="any"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900 placeholder-gray-500"
                     placeholder="19.076"
                     @input="onCoordinateChange"
                   />
@@ -809,7 +621,7 @@ export default defineComponent({
                     v-model.number="formData.location.coordinates.lng"
                     type="number"
                     step="any"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900 placeholder-gray-500"
                     placeholder="72.8777"
                     @input="onCoordinateChange"
                   />
@@ -918,6 +730,16 @@ export default defineComponent({
             <p v-if="errors.images" class="text-sm text-red-600">
               {{ errors.images }}
             </p>
+          </div>
+        </div>
+
+        <!-- General Error Message -->
+        <div v-if="submitError" class="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div class="flex items-center">
+            <svg class="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p class="text-sm text-red-800">{{ submitError }}</p>
           </div>
         </div>
 

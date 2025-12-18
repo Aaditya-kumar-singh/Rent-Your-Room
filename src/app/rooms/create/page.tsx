@@ -10,14 +10,6 @@ export default function CreateRoomPage() {
   const { data: session, status, update } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [refreshed, setRefreshed] = useState(false);
-
-  // Force session refresh on mount to get latest data
-  useEffect(() => {
-    if (status === "authenticated" && !refreshed) {
-      update().then(() => setRefreshed(true));
-    }
-  }, [status, refreshed, update]);
 
   const handleSubmit = async (formData: unknown) => {
     setIsSubmitting(true);
@@ -63,7 +55,7 @@ export default function CreateRoomPage() {
   }, [status, router]);
 
   // Show loading
-  if (status === "loading") {
+  if (status === "loading" && !session) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -79,17 +71,7 @@ export default function CreateRoomPage() {
     return null;
   }
 
-  // Wait for session refresh
-  if (status === "authenticated" && !refreshed) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Refreshing session...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   // Check if we have session data
   if (!session?.user) {
@@ -131,6 +113,10 @@ export default function CreateRoomPage() {
           </h2>
           <p className="text-gray-600 mb-4">
             You need to be an owner to create room listings.
+            <br />
+            <span className="text-sm mt-2 block bg-gray-100 p-1 rounded">
+              Current Role: <strong>{user.userType || "Undefined"}</strong>
+            </span>
           </p>
           <div className="space-y-2">
             <button

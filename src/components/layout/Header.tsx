@@ -71,7 +71,6 @@ export default function Header() {
                     </nav>
 
                     {/* Authentication Section */}
-                    {/* Authentication Section */}
                     <div className="flex items-center space-x-4">
                         {status === "loading" ? (
                             <div className="animate-pulse">
@@ -92,6 +91,7 @@ export default function Header() {
                                             width={32}
                                             height={32}
                                             className="rounded-full object-cover"
+                                            style={{ width: 'auto', height: 'auto' }}
                                         />
                                     ) : (
                                         <div className="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center">

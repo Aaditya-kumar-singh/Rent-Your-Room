@@ -41,12 +41,21 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_GOOGLE_MAPS_API_KEY:
       process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
   },
-  webpack: (config) => {
+  webpack: (config, { webpack }) => {
     // Add alias for Vue.js
     config.resolve.alias = {
       ...config.resolve.alias,
       vue: "vue/dist/vue.esm-bundler.js",
     };
+
+    // Define Vue feature flags
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        __VUE_OPTIONS_API__: JSON.stringify(true),
+        __VUE_PROD_DEVTOOLS__: JSON.stringify(false),
+        __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: JSON.stringify(false),
+      })
+    );
 
     return config;
   },

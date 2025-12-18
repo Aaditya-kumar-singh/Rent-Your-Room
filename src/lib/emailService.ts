@@ -61,6 +61,13 @@ class EmailService {
     from?: string
   ): Promise<boolean> {
     try {
+      // Check if email is configured
+      if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        console.error("Email service not configured. Missing EMAIL_USER or EMAIL_PASS environment variables.");
+        console.error("Please configure email settings in .env.local file.");
+        return false;
+      }
+
       const mailOptions = {
         from: from || process.env.EMAIL_FROM || "noreply@roomrental.com",
         to,
@@ -69,10 +76,18 @@ class EmailService {
         html: template.html,
       };
 
+      console.log(`Attempting to send email to: ${to}`);
+      console.log(`Email subject: ${template.subject}`);
+      
       await this.transporter.sendMail(mailOptions);
+      console.log(`Email sent successfully to: ${to}`);
       return true;
     } catch (error) {
       console.error("Email sending failed:", error);
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+      }
       return false;
     }
   }

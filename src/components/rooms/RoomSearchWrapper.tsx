@@ -67,6 +67,7 @@ export default function RoomSearchWrapper() {
   // Search rooms function
   const searchRooms = useCallback(
     async (filters: SearchFiltersType, page: number = 1) => {
+      console.log("🔍 [SEARCH] Starting search with filters:", filters, "page:", page);
       setLoading(true);
       setError(null);
 
@@ -75,22 +76,33 @@ export default function RoomSearchWrapper() {
         params.set("page", page.toString());
         params.set("limit", "10");
 
-        const response = await fetch(`/api/rooms?${params.toString()}`);
+        const apiUrl = `/api/rooms?${params.toString()}`;
+        console.log("🔍 [SEARCH] API URL:", apiUrl);
+        console.log("🔍 [SEARCH] Fetching rooms...");
+
+        const response = await fetch(apiUrl);
+        console.log("🔍 [SEARCH] Response status:", response.status, response.statusText);
+
         const data: SearchResponse = await response.json();
+        console.log("🔍 [SEARCH] Response data:", data);
 
         if (!response.ok) {
+          console.error("🔍 [SEARCH] API error:", data.error);
           throw new Error(data.error?.message || "Failed to search rooms");
         }
 
         if (data.success) {
+          console.log("🔍 [SEARCH] Success! Found", data.data.rooms.length, "rooms");
+          console.log("🔍 [SEARCH] Pagination:", data.data.pagination);
           setRooms(data.data.rooms);
           setPagination(data.data.pagination);
           setCurrentFilters(filters);
         } else {
+          console.error("🔍 [SEARCH] Search failed:", data.error);
           throw new Error(data.error?.message || "Search failed");
         }
       } catch (err) {
-        console.error("Search error:", err);
+        console.error("🔍 [SEARCH] Error caught:", err);
         setError(
           err instanceof Error
             ? err.message
@@ -104,6 +116,7 @@ export default function RoomSearchWrapper() {
           limit: 10,
         });
       } finally {
+        console.log("🔍 [SEARCH] Search complete, loading:", false);
         setLoading(false);
       }
     },

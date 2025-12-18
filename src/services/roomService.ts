@@ -40,18 +40,19 @@ export class RoomService {
       const normalizedData: any = { ...roomData };
       if (
         normalizedData?.location?.coordinates &&
-        typeof normalizedData.location.coordinates === "object" &&
-        "lat" in normalizedData.location.coordinates &&
-        "lng" in normalizedData.location.coordinates
+        typeof normalizedData.location.coordinates === "object"
       ) {
-        const { lat, lng } = normalizedData.location.coordinates as {
-          lat: number;
-          lng: number;
-        };
-        normalizedData.location.coordinates = {
-          type: "Point",
-          coordinates: [lng, lat],
-        };
+        // If it comes as { lat, lng }, convert to GeoJSON
+        if (
+          "lat" in normalizedData.location.coordinates &&
+          "lng" in normalizedData.location.coordinates
+        ) {
+          const { lat, lng } = normalizedData.location.coordinates as any;
+          normalizedData.location.coordinates = {
+            type: "Point",
+            coordinates: [lng, lat],
+          };
+        }
       }
 
       const room = new Room(normalizedData);
@@ -179,7 +180,11 @@ export class RoomService {
     page: number;
     totalPages: number;
   }> {
+    console.log("🔍 [RoomService] searchRooms called with filters:", JSON.stringify(filters, null, 2));
+    console.log("🔍 [RoomService] searchRooms options:", JSON.stringify(options, null, 2));
+
     await connectDB();
+    console.log("🔍 [RoomService] Database connected");
 
     const {
       page = 1,
@@ -250,9 +255,13 @@ export class RoomService {
       };
     }
 
+    console.log("🔍 [RoomService] MongoDB query:", JSON.stringify(query, null, 2));
+
     const sortOptions: Record<string, 1 | -1> = {};
     sortOptions[sortBy] = sortOrder === "asc" ? 1 : -1;
+    console.log("🔍 [RoomService] Sort options:", sortOptions);
 
+    console.log("🔍 [RoomService] Executing Room.find()...");
     const rooms = await Room.find(query)
       .populate("ownerId", "name email phone profileImage")
       .select("-__v")
@@ -261,8 +270,14 @@ export class RoomService {
       .limit(limit)
       .lean() as unknown as IRoom[];
 
+    console.log("🔍 [RoomService] Found", rooms.length, "rooms");
+
     const total = await Room.countDocuments(query);
+    console.log("🔍 [RoomService] Total count:", total);
+
     const totalPages = Math.ceil(total / limit);
+
+    console.log("🔍 [RoomService] Returning results - page:", page, "totalPages:", totalPages);
 
     return {
       rooms,

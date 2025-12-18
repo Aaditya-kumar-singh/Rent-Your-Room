@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { createApp } from "vue";
+// @ts-ignore
+import { createApp } from "vue/dist/vue.esm-bundler.js";
 import PaymentComponent from "@/components/vue/PaymentComponent";
 
 interface PaymentWrapperProps {

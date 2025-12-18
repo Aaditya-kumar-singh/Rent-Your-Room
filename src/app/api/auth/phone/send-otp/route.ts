@@ -90,14 +90,21 @@ export async function POST(request: NextRequest) {
     });
 
     // Send OTP via Email instead of SMS
+    console.log(`Attempting to send OTP to email: ${session.user.email}`);
     const emailSent = await sendVerificationEmail(session.user.email, otp);
 
     if (!emailSent) {
+      console.error("Failed to send OTP email. Please check email service configuration.");
       return NextResponse.json(
-        { error: "Failed to send OTP to your registered email." },
+        {
+          error: "Failed to send OTP to your registered email. Please ensure email service is configured correctly or contact support.",
+          details: "Email service may not be configured. Check server logs for more information."
+        },
         { status: 500 }
       );
     }
+
+    console.log(`OTP sent successfully to: ${session.user.email}`);
 
     return NextResponse.json(
       {

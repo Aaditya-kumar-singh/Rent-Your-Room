@@ -22,13 +22,7 @@ export const metadata: Metadata = {
     "Find and rent rooms with ease. Connect property owners with room seekers.",
   authors: [{ name: "Aaditya", url: "https://github.com/aaditya" }],
   creator: "Aaditya",
-  icons: {
-    icon: [
-      { url: "/favicon.ico" },
-      { url: "/icon.png", type: "image/png", sizes: "32x32" },
-    ],
-    apple: "/apple-icon.png",
-  },
+  creator: "Aaditya",
 };
 
 export default async function RootLayout({
@@ -40,9 +34,6 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}
       >

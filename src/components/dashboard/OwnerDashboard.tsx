@@ -91,21 +91,21 @@ export default function OwnerDashboard() {
       console.log("OwnerDashboard: Fetching data for user ID:", userId);
 
       const [roomsRes, bookingsRes, statsRes] = await Promise.all([
-        fetch(`/api/rooms/owner/${userId}`).catch((err) => {
+        fetch(`/api/rooms/owner/${userId}`, { cache: "no-store" }).catch((err) => {
           console.error("Rooms fetch error:", err);
           return new Response(
             JSON.stringify({ success: false, error: err.message }),
             { status: 500 }
           );
         }),
-        fetch(`/api/bookings/user/${userId}?type=owner`).catch((err) => {
+        fetch(`/api/bookings/user/${userId}?type=owner`, { cache: "no-store" }).catch((err) => {
           console.error("Bookings fetch error:", err);
           return new Response(
             JSON.stringify({ success: false, error: err.message }),
             { status: 500 }
           );
         }),
-        fetch(`/api/dashboard/owner/stats`).catch((err) => {
+        fetch(`/api/dashboard/owner/stats`, { cache: "no-store" }).catch((err) => {
           console.error("Stats fetch error:", err);
           return new Response(
             JSON.stringify({ success: false, error: err.message }),

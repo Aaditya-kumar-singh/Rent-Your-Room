@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { createApp, App as VueApp } from "vue";
+// @ts-ignore
+import { createApp, App as VueApp } from "vue/dist/vue.esm-bundler.js";
 import BookingForm from "@/components/vue/BookingForm";
+// Styles might be handled by Vue loader or global CSS, but importing just in case if separate
 
 
 interface Room {
@@ -23,8 +25,6 @@ interface Room {
   };
 }
 
-
-
 interface BookingFormWrapperProps {
   room: Room;
   onBookingComplete: (booking: { _id: string }) => void;
@@ -44,16 +44,34 @@ export default function BookingFormWrapper({
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Create Vue app instance
-    const app = createApp(BookingForm, {
-      room,
-      onBookingComplete,
-      onCancel,
-    });
+    let app: VueApp | null = null;
 
-    // Mount the Vue app
-    app.mount(containerRef.current);
-    vueAppRef.current = app;
+    const mountVueApp = async () => {
+      try {
+        console.log("Mounting BookingForm Vue app...");
+
+        // Small delay to ensure DOM is ready
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        if (!containerRef.current) return;
+
+        // Create Vue app instance
+        app = createApp(BookingForm, {
+          room,
+          onBookingComplete,
+          onCancel,
+        });
+
+        // Mount the Vue app
+        app.mount(containerRef.current);
+        vueAppRef.current = app;
+        console.log("BookingForm mounted successfully");
+      } catch (err) {
+        console.error("Failed to mount BookingForm:", err);
+      }
+    };
+
+    mountVueApp();
 
     // Cleanup function
     return () => {
@@ -65,6 +83,12 @@ export default function BookingFormWrapper({
   }, [room, onBookingComplete, onCancel]);
 
   return (
-    <div ref={containerRef} className={`booking-form-wrapper ${className}`} />
+    <div
+      ref={containerRef}
+      className={`booking-form-wrapper ${className}`}
+      style={{ minHeight: '100px' }}
+    />
   );
 }
+
+

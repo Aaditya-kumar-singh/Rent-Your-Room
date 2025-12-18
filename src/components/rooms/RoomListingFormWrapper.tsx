@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { createApp, App as VueApp } from "vue";
+// @ts-ignore
+import { createApp, App as VueApp } from "vue/dist/vue.esm-bundler.js";
 import { RoomFormData, RoomData } from "@/types/room";
+import RoomListingForm from "@/components/vue/RoomListingForm";
 
 interface RoomListingFormWrapperProps {
   initialData?: RoomData;
@@ -23,47 +25,17 @@ export default function RoomListingFormWrapper({
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Prevent double mounting
-    if (vueAppRef.current) {
-      return;
-    }
+    // Create Vue app instance
+    const app = createApp(RoomListingForm, {
+      initialData,
+      isEditing,
+      onSubmit,
+      onCancel,
+    });
 
-    // Import the full Vue component
-    import("../vue/RoomListingForm")
-      .then((module) => {
-        const RoomListingFormComponent = module.default;
-
-        // Check again if already mounted (race condition)
-        if (vueAppRef.current) {
-          return;
-        }
-
-        // Create Vue app instance with the full component
-        const app = createApp(RoomListingFormComponent, {
-          initialData,
-          isEditing,
-          onSubmit,
-          onCancel,
-        });
-
-        // Mount the Vue app
-        app.mount(containerRef.current!);
-        vueAppRef.current = app;
-      })
-      .catch((error) => {
-        console.error("Failed to load Vue component:", error);
-        // Fallback to a simple error message
-        if (containerRef.current) {
-          containerRef.current.innerHTML = `
-          <div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-            <div class="text-center">
-              <h2 class="text-2xl font-bold text-red-600 mb-4">Component Loading Error</h2>
-              <p class="text-gray-600">Failed to load the room listing form. Please refresh the page.</p>
-            </div>
-          </div>
-        `;
-        }
-      });
+    // Mount the Vue app
+    app.mount(containerRef.current);
+    vueAppRef.current = app;
 
     // Cleanup function
     return () => {

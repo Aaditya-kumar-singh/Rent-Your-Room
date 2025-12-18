@@ -94,9 +94,7 @@ export default function BookRoomPage() {
           return;
         }
 
-        if (user.userType !== "seeker" && user.userType !== "both") {
-          throw new Error("Only room seekers can book rooms. Please update your user type.");
-        }
+
 
         const response = await fetch(`/api/rooms/${roomId}`);
         const data: RoomDetailsResponse = await response.json();

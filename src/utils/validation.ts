@@ -80,9 +80,9 @@ export const roomCreateSchema = Joi.object({
         "string.pattern.base": "Pincode must be a 6-digit number",
       }),
     coordinates: Joi.object({
-      type: Joi.string().valid("Point").default("Point"),
-      coordinates: Joi.array().items(Joi.number()).length(2).required(),
-    }).required(),
+      lat: Joi.number().min(-90).max(90).required(),
+      lng: Joi.number().min(-180).max(180).required(),
+    }).unknown(true).required(),
   }).required(),
   amenities: Joi.array()
     .items(Joi.string().max(50))
@@ -94,7 +94,7 @@ export const roomCreateSchema = Joi.object({
       "array.max": "Cannot have more than 20 amenities",
     }),
   images: Joi.array()
-    .items(Joi.string().uri())
+    .items(Joi.string().min(1))
     .min(1)
     .max(10)
     .required()

@@ -117,14 +117,15 @@ export const authOptions = {
       return true;
     },
     async session({ session, token }: { session: any; token: any }) {
-      if (session.user) {
-        session.user.id = token.id;
-        session.user.userType = token.userType;
-        session.user.phoneVerified = token.phoneVerified;
-        // Prioritize the image from the token (which comes from DB)
-        session.user.image = token.picture || token.image || session.user.image;
-        session.user.name = token.name || session.user.name;
-      }
+      session.user = session.user || {};
+      session.user.id = token.id;
+      session.user.userType = token.userType;
+      session.user.phoneVerified = token.phoneVerified;
+      // Prioritize the image from the token (which comes from DB)
+      session.user.image = token.picture || token.image || session.user.image;
+      session.user.name = token.name || session.user.name;
+      session.user.email = token.email || session.user.email;
+
       return session;
     },
     async jwt({
@@ -149,45 +150,65 @@ export const authOptions = {
           if (account.provider === 'google') {
             dbUser = await User.findOne({ email: user.email });
           } else {
-            // For credentials, user is already the DB user object (or similar)
-            // But let's be safe and re-fetch or use what we have
             dbUser = await User.findOne({ email: user.email });
           }
+
+          // Ensure basic fields are on the token
+          token.email = user.email;
 
           if (dbUser) {
             token.id = dbUser._id.toString();
             token.userType = dbUser.userType;
             token.phoneVerified = dbUser.phoneVerified;
-            token.name = dbUser.name || user.name; // Ensure name is in token
-            // Use DB profile image if it exists, otherwise fallback to Google/User image
+            token.name = dbUser.name || user.name;
             token.picture = dbUser.profileImage || user.image;
           }
         } catch (e) {
           console.error("JWT Initial Signin Error", e);
         }
       }
-      // 2. Subsequent requests (Token exists) or Session Update
-      else {
-        // If this is a session update trigger, merge new data
-        if (trigger === "update" && session) {
-          token.userType = session.userType || token.userType;
-          token.picture = session.image || token.picture;
-          token.name = session.name || token.name;
-        }
-
-        // Optional: Periodically re-sync with DB (e.g., if we want to catch external changes)
-        // For now, we'll rely on the session update mechanism or initial load.
-        // However, to fix the specific "missing photo" or "missing name" issue, let's try to fetch if missing.
-        if ((!token.picture || !token.name) && token.id) {
-          try {
-            await connectDB();
+      // 2. Session Update Trigger - Refresh from DB
+      else if (trigger === "update") {
+        console.log("Session update triggered");
+        try {
+          await connectDB();
+          if (token.id) {
             const dbUser = await User.findById(token.id);
             if (dbUser) {
-              token.picture = dbUser.profileImage || token.picture;
+              token.userType = dbUser.userType;
+              token.phoneVerified = dbUser.phoneVerified;
               token.name = dbUser.name || token.name;
+              token.picture = dbUser.profileImage || token.picture;
+              token.email = dbUser.email || token.email;
+            }
+          }
+          if (session) {
+            token.userType = session.userType || token.userType;
+            token.picture = session.image || token.picture;
+            token.name = session.name || token.name;
+          }
+        } catch (e) {
+          console.error("JWT Session Update Error", e);
+        }
+      }
+      // 3. Subsequent requests
+      else {
+        const userId = token.id || token.sub;
+        // Fallback verify if missing key data
+        if ((!token.picture || !token.name || !token.email) && userId) {
+          try {
+            await connectDB();
+            const dbUser = await User.findById(userId);
+            if (dbUser) {
+              token.id = dbUser._id.toString(); // Ensure ID is set
+              token.email = dbUser.email || token.email;
+              token.name = dbUser.name || token.name;
+              token.picture = dbUser.profileImage || token.picture;
+              token.userType = dbUser.userType || token.userType;
+              token.phoneVerified = dbUser.phoneVerified ?? token.phoneVerified;
             }
           } catch (e) {
-            console.error("JWT Re-fetch error", e);
+            console.error("JWT Re-fetch Error", e);
           }
         }
       }

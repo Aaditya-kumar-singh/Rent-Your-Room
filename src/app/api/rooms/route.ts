@@ -48,20 +48,20 @@ async function createRoom(req: AuthenticatedRequest): Promise<NextResponse> {
       );
     }
 
-    // Check if user has verified phone number
-    if (!req.user.phoneVerified) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "PHONE_VERIFICATION_REQUIRED",
-            message: "Phone verification is required to create room listings",
-            details: "Please verify your phone number before creating listings",
-          },
-        },
-        { status: 403 }
-      );
-    }
+    // Check if user has verified phone number - DISABLED as per user request
+    // if (!req.user.phoneVerified) {
+    //   return NextResponse.json(
+    //     {
+    //       success: false,
+    //       error: {
+    //         code: "PHONE_VERIFICATION_REQUIRED",
+    //         message: "Phone verification is required to create room listings",
+    //         details: "Please verify your phone number before creating listings",
+    //       },
+    //     },
+    //     { status: 403 }
+    //   );
+    // }
 
     // Create room with owner ID
     const roomData = {
@@ -142,7 +142,9 @@ async function createRoom(req: AuthenticatedRequest): Promise<NextResponse> {
  */
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
+    console.log("🔍 [API] GET /api/rooms called");
     const { searchParams } = new URL(req.url);
+    console.log("🔍 [API] Search params:", searchParams.toString());
 
     // Parse search filters
     const filters: RoomSearchFilters = {};
@@ -196,6 +198,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       };
     }
 
+    console.log("🔍 [API] Parsed filters:", JSON.stringify(filters, null, 2));
+
     // Parse pagination options
     const options: PaginationOptions = {};
     const page = searchParams.get("page");
@@ -210,8 +214,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       options.sortOrder = sortOrder;
     }
 
+    console.log("🔍 [API] Pagination options:", JSON.stringify(options, null, 2));
+
     // Validate numeric parameters
     if (filters.minRent && (isNaN(filters.minRent) || filters.minRent < 0)) {
+      console.error("🔍 [API] Invalid minRent:", filters.minRent);
       return NextResponse.json(
         {
           success: false,
@@ -226,6 +233,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     if (filters.maxRent && (isNaN(filters.maxRent) || filters.maxRent < 0)) {
+      console.error("🔍 [API] Invalid maxRent:", filters.maxRent);
       return NextResponse.json(
         {
           success: false,
@@ -241,6 +249,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     if (filters.coordinates) {
       if (isNaN(filters.coordinates.lat) || isNaN(filters.coordinates.lng)) {
+        console.error("🔍 [API] Invalid coordinates:", filters.coordinates);
         return NextResponse.json(
           {
             success: false,
@@ -255,6 +264,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       }
 
       if (filters.coordinates.lat < -90 || filters.coordinates.lat > 90) {
+        console.error("🔍 [API] Latitude out of range:", filters.coordinates.lat);
         return NextResponse.json(
           {
             success: false,
@@ -269,6 +279,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       }
 
       if (filters.coordinates.lng < -180 || filters.coordinates.lng > 180) {
+        console.error("🔍 [API] Longitude out of range:", filters.coordinates.lng);
         return NextResponse.json(
           {
             success: false,
@@ -283,8 +294,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       }
     }
 
+    console.log("🔍 [API] Calling RoomService.searchRooms...");
     // Search rooms
     const result = await RoomService.searchRooms(filters, options);
+    console.log("🔍 [API] RoomService returned", result.rooms.length, "rooms, total:", result.total);
 
     return NextResponse.json(
       {
@@ -303,7 +316,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       { status: 200 }
     );
   } catch (error: unknown) {
-    console.error("Room search error:", error);
+    console.error("🔍 [API] Room search error:", error);
 
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
