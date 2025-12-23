@@ -279,11 +279,11 @@ export default function UserProfile() {
                     id="userType"
                     value={userType}
                     onChange={(e) => setUserType(e.target.value as any)}
-                    className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-10 w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <option value="seeker">Room Seeker</option>
-                    <option value="owner">Property Owner</option>
-                    <option value="both">Both (Seeker & Owner)</option>
+                    <option value="seeker" className="bg-background text-foreground">Room Seeker</option>
+                    <option value="owner" className="bg-background text-foreground">Property Owner</option>
+                    <option value="both" className="bg-background text-foreground">Both (Seeker & Owner)</option>
                   </select>
                 </div>
               </div>

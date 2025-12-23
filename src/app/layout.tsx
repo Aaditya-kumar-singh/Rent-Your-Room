@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     "Find and rent rooms with ease. Connect property owners with room seekers.",
   authors: [{ name: "Aaditya", url: "https://github.com/aaditya" }],
   creator: "Aaditya",
-  creator: "Aaditya",
+
 };
 
 export default async function RootLayout({

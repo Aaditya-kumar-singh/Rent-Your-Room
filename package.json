@@ -1,6 +1,7 @@
 {
   "name": "room-rental-platform",
   "version": "0.1.0",
+  "author": "Aaditya",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -13,6 +14,8 @@
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.11.1",
+    "@stripe/react-stripe-js": "^5.4.1",
+    "@stripe/stripe-js": "^8.6.0",
     "@types/leaflet": "^1.9.21",
     "@types/nodemailer": "^7.0.3",
     "@vue/server-renderer": "^3.5.22",
@@ -33,6 +36,7 @@
     "react-leaflet": "^5.0.0",
     "react-leaflet-cluster": "^4.0.0",
     "sharp": "^0.33.5",
+    "stripe": "^20.1.0",
     "vue": "^3.5.22"
   },
   "devDependencies": {

@@ -12,6 +12,7 @@ export interface IPayment extends Document {
   transactionDate?: Date;
   refundAmount?: number;
   refundDate?: Date;
+  gateway?: "razorpay" | "stripe";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -65,6 +66,10 @@ const PaymentSchema: Schema = new Schema(
     },
     refundDate: {
       type: Date,
+    },
+    gateway: {
+      type: String,
+      enum: ["razorpay", "stripe"],
     },
   },
   {

@@ -13,6 +13,7 @@ export interface IBooking extends Document {
     status: "pending" | "completed" | "failed" | "refunded";
     paymentDate?: Date;
     refundDate?: Date;
+    gateway?: "razorpay" | "stripe";
   };
   requestDate: Date;
   responseDate?: Date;
@@ -46,6 +47,10 @@ const PaymentSchema = new Schema(
     },
     refundDate: {
       type: Date,
+    },
+    gateway: {
+      type: String,
+      enum: ["razorpay", "stripe"],
     },
   },
   { _id: false }

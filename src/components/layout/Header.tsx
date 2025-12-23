@@ -142,6 +142,9 @@ export default function Header() {
                                         >
                                             {isLoggingOut ? "Logging Out..." : "Log Out"}
                                         </button>
+                                        <div className="px-4 py-2 border-t border-gray-100 text-xs text-gray-500 uppercase tracking-wider font-semibold">
+                                            Role: {(session.user as any)?.userType || "User"}
+                                        </div>
                                     </div>
                                 )}
                             </div>

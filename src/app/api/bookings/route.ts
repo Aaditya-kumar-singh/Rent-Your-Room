@@ -38,6 +38,8 @@ async function createBooking(req: AuthenticatedRequest): Promise<NextResponse> {
     }
 
     // Check if user is a seeker (only seekers can create bookings)
+    // Relaxed restriction to allow owners to also book rooms (except their own)
+    /*
     if (req.user.userType !== "seeker" && req.user.userType !== "both") {
       return NextResponse.json(
         {
@@ -51,6 +53,7 @@ async function createBooking(req: AuthenticatedRequest): Promise<NextResponse> {
         { status: 403 }
       );
     }
+    */
 
     const body = await req.json();
     const validatedData = validateInput<{
