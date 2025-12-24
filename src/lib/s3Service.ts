@@ -1,7 +1,7 @@
 import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { s3Client } from "./aws";
 
-const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME || "";
+const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME || process.env.MY_S3_BUCKET || "";
 
 export async function uploadToS3(
     fileBuffer: Buffer,
@@ -26,7 +26,7 @@ export async function uploadToS3(
     try {
         await s3Client.send(command);
         // Return the URL. checking region to construct typical S3 URL
-        const region = process.env.AWS_REGION || "us-east-1";
+        const region = process.env.AWS_REGION || process.env.MY_AWS_REGION || "us-east-1";
         return `https://${BUCKET_NAME}.s3.${region}.amazonaws.com/${key}`;
     } catch (error) {
         console.error("S3 Upload Error:", error);

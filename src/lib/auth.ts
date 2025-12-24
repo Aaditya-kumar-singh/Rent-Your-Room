@@ -231,4 +231,7 @@ export const authOptions = {
     strategy: "jwt" as const,
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
+  // Trust Host is required for deployments behind proxies (like AWS Amplify)
+  // to ensure the correct NEXTAUTH_URL is respected.
+  trustHost: true,
 };
