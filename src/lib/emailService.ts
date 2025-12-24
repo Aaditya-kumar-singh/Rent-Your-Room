@@ -78,7 +78,7 @@ class EmailService {
 
       console.log(`Attempting to send email to: ${to}`);
       console.log(`Email subject: ${template.subject}`);
-      
+
       await this.transporter.sendMail(mailOptions);
       console.log(`Email sent successfully to: ${to}`);
       return true;
@@ -129,19 +129,17 @@ class EmailService {
                 <p><strong>Amount:</strong> ₹${data.amount.toLocaleString()}</p>
                 <p><strong>Request Date:</strong> ${data.requestDate}</p>
                 <p><strong>Booking ID:</strong> ${data.bookingId}</p>
-                ${
-                  data.message
-                    ? `<p><strong>Message:</strong> ${data.message}</p>`
-                    : ""
-                }
+                ${data.message
+        ? `<p><strong>Message:</strong> ${data.message}</p>`
+        : ""
+      }
               </div>
               
               <p>Please review the booking request and respond as soon as possible.</p>
               
               <div style="text-align: center;">
-                <a href="${
-                  process.env.NEXTAUTH_URL
-                }/dashboard" class="button">View Dashboard</a>
+                <a href="${process.env.NEXTAUTH_URL
+      }/dashboard" class="button">View Dashboard</a>
               </div>
             </div>
             <div class="footer">
@@ -180,9 +178,8 @@ class EmailService {
     data: BookingResponseData
   ): EmailTemplate {
     const isConfirmed = data.status === "confirmed";
-    const subject = `Booking ${isConfirmed ? "Confirmed" : "Cancelled"}: ${
-      data.roomTitle
-    }`;
+    const subject = `Booking ${isConfirmed ? "Confirmed" : "Cancelled"}: ${data.roomTitle
+      }`;
 
     const html = `
       <!DOCTYPE html>
@@ -192,9 +189,8 @@ class EmailService {
           <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background-color: ${
-              isConfirmed ? "#10B981" : "#EF4444"
-            }; color: white; padding: 20px; text-align: center; }
+            .header { background-color: ${isConfirmed ? "#10B981" : "#EF4444"
+      }; color: white; padding: 20px; text-align: center; }
             .content { padding: 20px; background-color: #f9f9f9; }
             .booking-details { background-color: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
             .button { display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: white; text-decoration: none; border-radius: 5px; margin: 10px 5px; }
@@ -208,37 +204,32 @@ class EmailService {
             </div>
             <div class="content">
               <p>Hello ${data.seekerName},</p>
-              <p>Your booking request has been ${
-                isConfirmed ? "confirmed" : "cancelled"
-              } by the property owner.</p>
+              <p>Your booking request has been ${isConfirmed ? "confirmed" : "cancelled"
+      } by the property owner.</p>
               
               <div class="booking-details">
                 <h3>Booking Details</h3>
                 <p><strong>Room:</strong> ${data.roomTitle}</p>
                 <p><strong>Location:</strong> ${data.roomAddress}</p>
                 <p><strong>Owner:</strong> ${data.ownerName}</p>
-                <p><strong>Status:</strong> ${
-                  isConfirmed ? "Confirmed" : "Cancelled"
-                }</p>
+                <p><strong>Status:</strong> ${isConfirmed ? "Confirmed" : "Cancelled"
+      }</p>
                 <p><strong>Response Date:</strong> ${data.responseDate}</p>
                 <p><strong>Booking ID:</strong> ${data.bookingId}</p>
-                ${
-                  data.ownerMessage
-                    ? `<p><strong>Owner's Message:</strong> ${data.ownerMessage}</p>`
-                    : ""
-                }
+                ${data.ownerMessage
+        ? `<p><strong>Owner's Message:</strong> ${data.ownerMessage}</p>`
+        : ""
+      }
               </div>
               
-              ${
-                isConfirmed
-                  ? "<p>Congratulations! Your booking has been confirmed. You can now proceed with the next steps.</p>"
-                  : "<p>We apologize that your booking request was not accepted. Please continue searching for other available rooms.</p>"
-              }
+              ${isConfirmed
+        ? "<p>Congratulations! Your booking has been confirmed. You can now proceed with the next steps.</p>"
+        : "<p>We apologize that your booking request was not accepted. Please continue searching for other available rooms.</p>"
+      }
               
               <div style="text-align: center;">
-                <a href="${
-                  process.env.NEXTAUTH_URL
-                }/dashboard" class="button">View Dashboard</a>
+                <a href="${process.env.NEXTAUTH_URL
+      }/dashboard" class="button">View Dashboard</a>
               </div>
             </div>
             <div class="footer">
@@ -254,8 +245,7 @@ class EmailService {
       
       Hello ${data.seekerName},
       
-      Your booking request has been ${
-        isConfirmed ? "confirmed" : "cancelled"
+      Your booking request has been ${isConfirmed ? "confirmed" : "cancelled"
       } by the property owner.
       
       Booking Details:
@@ -267,10 +257,9 @@ class EmailService {
       - Booking ID: ${data.bookingId}
       ${data.ownerMessage ? `- Owner's Message: ${data.ownerMessage}` : ""}
       
-      ${
-        isConfirmed
-          ? "Congratulations! Your booking has been confirmed. You can now proceed with the next steps."
-          : "We apologize that your booking request was not accepted. Please continue searching for other available rooms."
+      ${isConfirmed
+        ? "Congratulations! Your booking has been confirmed. You can now proceed with the next steps."
+        : "We apologize that your booking request was not accepted. Please continue searching for other available rooms."
       }
       
       Visit your dashboard: ${process.env.NEXTAUTH_URL}/dashboard
@@ -344,9 +333,8 @@ class EmailService {
               <p>The booking is now confirmed and you can prepare the room for your new tenant.</p>
               
               <div style="text-align: center;">
-                <a href="${
-                  process.env.NEXTAUTH_URL
-                }/dashboard" class="button">View Dashboard</a>
+                <a href="${process.env.NEXTAUTH_URL
+      }/dashboard" class="button">View Dashboard</a>
               </div>
             </div>
             <div class="footer">
@@ -381,7 +369,7 @@ class EmailService {
 
   async sendOTP(email: string, otp: string): Promise<boolean> {
     const subject = "Your Verification Code";
-    
+
     const html = `
       <!DOCTYPE html>
       <html>

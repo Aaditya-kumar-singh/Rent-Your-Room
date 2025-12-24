@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
-import { existsSync } from "fs";
+import { uploadToS3 } from "@/lib/s3Service";
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,12 +20,6 @@ export async function POST(request: NextRequest) {
     }
 
     const uploadedUrls: string[] = [];
-    const uploadDir = join(process.cwd(), "public", "uploads", type || "rooms");
-
-    // Create upload directory if it doesn't exist
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
-    }
 
     // Process each file
     for (const file of files) {
@@ -50,19 +42,21 @@ export async function POST(request: NextRequest) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      // Generate unique filename
-      const timestamp = Date.now();
-      const randomSuffix = Math.random().toString(36).substring(2, 8);
+      // Clean filename
       const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-      const filename = `${timestamp}_${randomSuffix}_${originalName}`;
-      const filepath = join(uploadDir, filename);
 
-      // Write file
-      await writeFile(filepath, buffer);
-
-      // Add the public URL to results
-      const url = `/uploads/${type || "rooms"}/${filename}`;
-      uploadedUrls.push(url);
+      try {
+        const folder = type || "rooms";
+        const url = await uploadToS3(buffer, originalName, file.type, folder);
+        uploadedUrls.push(url);
+      } catch (uploadError) {
+        console.error(`Failed to upload ${file.name}:`, uploadError);
+        // Continue or abort? Let's abort to be safe/consistent
+        return NextResponse.json(
+          { error: "Failed to upload to S3" },
+          { status: 500 }
+        );
+      }
     }
 
     return NextResponse.json(
