@@ -234,4 +234,11 @@ export const authOptions = {
   // Trust Host is required for deployments behind proxies (like AWS Amplify)
   // to ensure the correct NEXTAUTH_URL is respected.
   trustHost: true,
+  // Force the URL if environment variable is missing but we know we are in prod
+  // This is a fallback to ensure we never redirect to localhost in production
+  ...(process.env.NODE_ENV === "production" && {
+    secret: process.env.NEXTAUTH_SECRET, // explicit secret
+    // If NEXTAUTH_URL is missing, use the hardcoded Amplify domain
+    baseUrl: process.env.NEXTAUTH_URL || "https://master.d136gzxnnpn7xq.amplifyapp.com"
+  })
 };
